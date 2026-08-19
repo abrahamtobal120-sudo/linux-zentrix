@@ -1,0 +1,6 @@
+[Compositing]
+AnimationSpeed=3
+Enabled=true
+
+[Plugins]
+blurEnabled=true

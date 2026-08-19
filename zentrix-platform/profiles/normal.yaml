@@ -1,0 +1,12 @@
+name: normal
+summary: Balanced system behavior for daily usage.
+packages: []
+services:
+  enable: []
+  disable: []
+power:
+  profile: balanced
+ui:
+  reduce_animations: false
+security:
+  strict_firewall: false

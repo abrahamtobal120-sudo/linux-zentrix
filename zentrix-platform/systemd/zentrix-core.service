@@ -1,0 +1,16 @@
+[Unit]
+Description=Zentrix Core Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/usr/share/zentrix-platform
+ExecStart=/usr/bin/python /usr/share/zentrix-platform/daemon/main.py --config /etc/zentrix/zentrix.yaml --bus system
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+as_root() {
+  if [[ "${EUID}" -eq 0 ]]; then
+    "$@"
+  else
+    sudo "$@"
+  fi
+}
+
+echo "Zentrix Update"
+echo "Este comando usara una actualizacion segura con pacman -Syu."
+echo "No se ejecutaran operaciones destructivas automaticas."
+echo
+
+if ! command -v pacman >/dev/null 2>&1; then
+  echo "Error: pacman no esta disponible en el sistema." >&2
+  exit 1
+fi
+
+if [[ "${EUID}" -ne 0 ]] && ! command -v sudo >/dev/null 2>&1; then
+  echo "Error: sudo no esta disponible en el sistema para elevar privilegios." >&2
+  exit 1
+fi
+
+if command -v ping >/dev/null 2>&1; then
+  if ! ping -c 1 -W 2 archlinux.org >/dev/null 2>&1; then
+    echo "Aviso: no se pudo verificar conectividad a internet." >&2
+    echo "Puedes continuar, pero la actualizacion podria fallar." >&2
+  fi
+fi
+
+read -r -p "Deseas continuar con la actualizacion? [y/N]: " reply
+
+if [[ ! "$reply" =~ ^[Yy]$ ]]; then
+  echo "Actualizacion cancelada por el usuario."
+  exit 0
+fi
+
+if as_root pacman -Syu; then
+  echo "Actualizacion completada correctamente."
+else
+  echo "Error: la actualizacion no pudo completarse." >&2
+  exit 1
+fi

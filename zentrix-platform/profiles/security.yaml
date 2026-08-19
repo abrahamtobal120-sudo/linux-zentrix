@@ -1,0 +1,15 @@
+name: security
+summary: Ethical security lab profile. Use only on authorized systems.
+packages:
+  optional:
+    - nmap
+    - wireshark-qt
+    - sqlmap
+    - tcpdump
+services:
+  enable: []
+  disable: []
+power:
+  profile: balanced
+notes:
+  - Use only on systems you own or are authorized to test.

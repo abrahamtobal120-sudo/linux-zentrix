@@ -1,0 +1,82 @@
+# Identity and tooling
+fastfetch
+dbus
+sudo
+polkit
+kdialog
+
+# Kernel baseline
+linux
+linux-headers
+linux-firmware
+plymouth
+grub
+efibootmgr
+btrfs-progs
+dosfstools
+mtools
+os-prober
+ttf-dejavu
+
+# Core connectivity and services
+networkmanager
+wpa_supplicant
+wireless_tools
+bluez
+bluez-utils
+openssh
+
+# Desktop stack
+xorg-server
+plasma-meta
+kde-applications-meta
+plasma-nm
+kde-gtk-config
+xdg-desktop-portal-kde
+sddm
+konsole
+dolphin
+ark
+kate
+spectacle
+gwenview
+
+# Installer
+calamares
+
+# Multimedia and user apps
+firefox
+vlc
+
+# CLI and development
+git
+nano
+vim
+htop
+btop
+curl
+wget
+python
+python-pip
+pyside6
+python-yaml
+python-dbus-next
+nodejs
+npm
+gcc
+make
+cmake
+
+# Audio
+pipewire
+pipewire-alsa
+pipewire-pulse
+wireplumber
+
+# Utilities for live media and storage
+udisks2
+ntfs-3g
+usbutils
+
+# Optional icon baseline
+papirus-icon-theme

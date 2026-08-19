@@ -1,0 +1,24 @@
+# Build artifacts
+work/
+out/
+.build/
+cache/
+
+# ISO images
+*.iso
+
+# Temporary and editor files
+*.tmp
+*.swp
+*.swo
+.DS_Store
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Node cache
+node_modules/
+
+# Local logs
+*.log

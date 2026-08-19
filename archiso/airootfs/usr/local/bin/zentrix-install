@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+settings_file="/etc/calamares/settings.conf"
+
+if ! command -v calamares >/dev/null 2>&1; then
+  if command -v kdialog >/dev/null 2>&1; then
+    kdialog --error "Calamares no esta instalado en esta imagen Live."
+  else
+    echo "Calamares no esta instalado en esta imagen Live." >&2
+  fi
+  exit 1
+fi
+
+if [[ ! -f "$settings_file" ]]; then
+  if command -v kdialog >/dev/null 2>&1; then
+    kdialog --warningyesno "No se encontro $settings_file.\n\nCalamares puede abrir con configuracion por defecto.\n\nDeseas continuar?" || exit 1
+  fi
+fi
+
+# Start installer with polkit when needed; live rule allows this for user zentrix.
+if [[ "${EUID}" -eq 0 ]]; then
+  exec /usr/bin/calamares
+fi
+
+exec pkexec /usr/bin/calamares

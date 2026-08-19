@@ -1,0 +1,2 @@
+These PNG files are temporary 1x1 placeholders and must be replaced
+with final Zentrix artwork for each target resolution.

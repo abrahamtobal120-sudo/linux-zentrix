@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zentrix-platform"
+version = "0.1.0"
+description = "Zentrix Core platform services and tooling"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "PyYAML>=6.0",
+  "dbus-next>=0.2.3",
+  "PySide6>=6.6"
+]
+
+[project.scripts]
+zentrixctl = "cli.main:main"
+zentrix-control-center = "gui.control_center:main"
+zentrix-mode = "cli.mode:main"
+zentrix-health = "cli.health:main"
+zentrix-drivers = "cli.drivers:main"
+zentrix-repair = "cli.repair:main"
+zentrix-security = "cli.security:main"
+zentrix-app = "cli.app:main"
+zentrix-snapshot = "cli.snapshot:main"
+zentrix-firewall = "cli.firewall:main"
+
+[tool.setuptools]
+packages = [
+  "core",
+  "daemon",
+  "api",
+  "cli",
+  "gui",
+  "modules",
+  "modules.updater",
+  "modules.drivers",
+  "modules.profiles",
+  "modules.parental",
+  "modules.creator",
+  "modules.developer",
+  "modules.security",
+  "modules.gaming",
+  "modules.recovery",
+  "modules.snapshots",
+  "modules.privacy",
+  "modules.firewall"
+]

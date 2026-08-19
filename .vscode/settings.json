@@ -1,0 +1,6 @@
+{
+  "files.eol": "\n",
+  "editor.formatOnSave": false,
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.cwd": "${workspaceFolder}/zentrix-os"
+}

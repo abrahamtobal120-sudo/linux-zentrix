@@ -1,0 +1,122 @@
+{
+  "current_profile": "normal",
+  "active_mode": "normal",
+  "last_update_check": "",
+  "previous_profile": "normal",
+  "previous_mode": "normal",
+  "pending_restore": {
+    "profile": "normal",
+    "mode": "normal",
+    "saved_at": "2026-08-19T00:53:02.822590+00:00"
+  },
+  "module_state": {},
+  "history": [
+    {
+      "action": "apply-profile",
+      "from": "normal",
+      "to": "performance",
+      "time": "2026-08-19T00:46:36.462022+00:00",
+      "warnings": [],
+      "diff": {
+        "from": "normal",
+        "to": "performance",
+        "changes": [
+          {
+            "field": "name",
+            "from": "normal",
+            "to": "performance"
+          },
+          {
+            "field": "power",
+            "from": {
+              "profile": "balanced"
+            },
+            "to": {
+              "profile": "performance"
+            }
+          },
+          {
+            "field": "summary",
+            "from": "Balanced system behavior for daily usage.",
+            "to": "Prioritize responsiveness and raw performance."
+          },
+          {
+            "field": "warnings",
+            "from": null,
+            "to": [
+              "Higher power consumption may reduce battery life."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "action": "apply-profile",
+      "from": "performance",
+      "to": "normal",
+      "time": "2026-08-19T00:46:37.845119+00:00",
+      "warnings": [],
+      "diff": {
+        "from": "performance",
+        "to": "normal",
+        "changes": [
+          {
+            "field": "name",
+            "from": "performance",
+            "to": "normal"
+          },
+          {
+            "field": "power",
+            "from": {
+              "profile": "performance"
+            },
+            "to": {
+              "profile": "balanced"
+            }
+          },
+          {
+            "field": "summary",
+            "from": "Prioritize responsiveness and raw performance.",
+            "to": "Balanced system behavior for daily usage."
+          },
+          {
+            "field": "warnings",
+            "from": [
+              "Higher power consumption may reduce battery life."
+            ],
+            "to": null
+          }
+        ]
+      }
+    },
+    {
+      "action": "restore-profile",
+      "to": "normal",
+      "time": "2026-08-19T00:46:37.845615+00:00"
+    },
+    {
+      "action": "apply-profile",
+      "from": "normal",
+      "to": "normal",
+      "time": "2026-08-19T00:53:02.247280+00:00",
+      "warnings": [],
+      "diff": {
+        "from": "normal",
+        "to": "normal",
+        "changes": []
+      }
+    },
+    {
+      "action": "apply-profile",
+      "from": "normal",
+      "to": "normal",
+      "time": "2026-08-19T00:53:02.822605+00:00",
+      "warnings": [],
+      "diff": {
+        "from": "normal",
+        "to": "normal",
+        "changes": []
+      }
+    }
+  ]
+}

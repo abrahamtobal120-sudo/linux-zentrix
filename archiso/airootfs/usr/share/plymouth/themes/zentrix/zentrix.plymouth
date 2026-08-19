@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Zentrix
+Description=Zentrix boot theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/zentrix
+ScriptFile=/usr/share/plymouth/themes/zentrix/zentrix.script

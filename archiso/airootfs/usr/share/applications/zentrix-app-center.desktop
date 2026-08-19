@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zentrix App Center
+Comment=Open the Zentrix application tools
+Exec=zentrix-app-center
+Icon=preferences-system
+Terminal=false
+Categories=System;
+StartupNotify=true

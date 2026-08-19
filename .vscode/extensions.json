@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-vscode.makefile-tools",
+    "ms-python.python",
+    "ms-azuretools.vscode-docker",
+    "eamodio.gitlens",
+    "redhat.vscode-yaml"
+  ]
+}

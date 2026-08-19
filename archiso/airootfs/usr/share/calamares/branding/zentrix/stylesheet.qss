@@ -1,0 +1,33 @@
+QWidget {
+  background-color: #0c1017;
+  color: #e6edf7;
+  font-family: Noto Sans;
+  font-size: 10pt;
+}
+
+QFrame#sidebarApp {
+  background-color: #101726;
+}
+
+QPushButton {
+  background: #1d2738;
+  color: #e7edf9;
+  border: 1px solid #31435f;
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+
+QPushButton:hover {
+  background: #243249;
+}
+
+QPushButton:pressed {
+  background: #1f8bff;
+}
+
+QLineEdit, QComboBox, QTextEdit, QPlainTextEdit {
+  background-color: #101621;
+  border: 1px solid #233047;
+  border-radius: 5px;
+  padding: 4px;
+}

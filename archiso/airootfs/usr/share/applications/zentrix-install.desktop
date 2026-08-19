@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Install Zentrix
+Comment=Install Zentrix by Abraham Tobal
+Exec=zentrix-install
+Icon=drive-harddisk
+Terminal=false
+Categories=System;Settings;
+StartupNotify=true

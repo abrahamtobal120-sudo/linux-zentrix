@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zentrix KDE Defaults
+Comment=Apply first-run Zentrix defaults for KDE Plasma
+Exec=/usr/local/bin/zentrix-apply-kde-defaults
+OnlyShowIn=KDE;
+X-KDE-autostart-phase=1
+X-KDE-StartupNotify=false
+NoDisplay=true

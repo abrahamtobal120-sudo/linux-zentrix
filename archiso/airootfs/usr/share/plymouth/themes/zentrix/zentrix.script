@@ -1,0 +1,51 @@
+Window.SetBackgroundTopColor(0.02, 0.03, 0.05);
+Window.SetBackgroundBottomColor(0.02, 0.03, 0.05);
+
+logo = Image("logo.png");
+logoSprite = Sprite(logo);
+logoSprite.SetZ(100);
+logoSprite.SetOpacity(1.0);
+
+fun positionLogo() {
+  logoW = logo.GetWidth();
+  logoH = logo.GetHeight();
+  screenW = Window.GetWidth();
+  screenH = Window.GetHeight();
+
+  logoSprite.SetX((screenW - logoW) / 2);
+  logoSprite.SetY((screenH - logoH) / 2 - 120);
+}
+
+positionLogo();
+
+title = "ZENTRIX";
+subtitle = "by Abraham Tobal";
+statusText = "Starting...";
+
+fun makeLabel(txt, size, yOffset, r, g, b) {
+  label = Label(txt);
+  label.SetColor(r, g, b);
+  label.SetZ(101);
+
+  fun redraw() {
+    label.SetX((Window.GetWidth() - label.GetWidth()) / 2);
+    label.SetY((Window.GetHeight() / 2) + yOffset);
+  }
+
+  redraw();
+  return label;
+}
+
+titleLabel = makeLabel(title, 28, 10, 0.90, 0.93, 0.98);
+subtitleLabel = makeLabel(subtitle, 18, 42, 0.62, 0.70, 0.82);
+statusLabel = makeLabel(statusText, 16, 84, 0.55, 0.82, 1.0);
+
+Plymouth.SetUpdateStatusFunction(function(status) {
+  if (status != "") {
+    statusLabel.SetText(status);
+  }
+});
+
+Plymouth.SetRefreshFunction(function() {
+  positionLogo();
+});

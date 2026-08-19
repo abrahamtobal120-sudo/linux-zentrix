@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zentrix"
+STATE_FILE="$STATE_DIR/kde-defaults-applied"
+DEFAULT_WALLPAPER="/usr/share/wallpapers/zentrix-dark.png"
+
+mkdir -p "$STATE_DIR"
+
+if [[ -f "$STATE_FILE" ]]; then
+  exit 0
+fi
+
+if command -v plasma-apply-colorscheme >/dev/null 2>&1; then
+  plasma-apply-colorscheme BreezeDark >/dev/null 2>&1 || true
+fi
+
+if command -v plasma-apply-wallpaperimage >/dev/null 2>&1 && [[ -f "$DEFAULT_WALLPAPER" ]]; then
+  plasma-apply-wallpaperimage "$DEFAULT_WALLPAPER" >/dev/null 2>&1 || true
+fi
+
+if command -v lookandfeeltool >/dev/null 2>&1; then
+  lookandfeeltool -a org.kde.breezedark.desktop >/dev/null 2>&1 || true
+fi
+
+date +%s > "$STATE_FILE"

@@ -1,0 +1,13 @@
+name: school
+summary: Stable profile for study and productivity.
+packages:
+  optional:
+    - libreoffice-fresh
+    - okular
+services:
+  enable: []
+  disable: []
+power:
+  profile: power-saver
+ui:
+  reduce_animations: true

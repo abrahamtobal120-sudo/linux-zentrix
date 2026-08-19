@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode="full"
+if [[ "${1:-}" == "--fastfetch" ]]; then
+  mode="fastfetch"
+fi
+
+kernel_name="$(uname -s 2>/dev/null || echo Linux)"
+kernel_release="$(uname -r 2>/dev/null || echo unknown)"
+arch_name="$(uname -m 2>/dev/null || echo x86_64)"
+pkg_count="unknown"
+
+if command -v pacman >/dev/null 2>&1; then
+  pkg_count="$(pacman -Qq 2>/dev/null | wc -l | tr -d ' ' || echo unknown)"
+fi
+
+if [[ "$mode" == "fastfetch" ]]; then
+  if command -v fastfetch >/dev/null 2>&1; then
+    if [[ -f /usr/share/zentrix/fastfetch.jsonc ]]; then
+      exec fastfetch --config /usr/share/zentrix/fastfetch.jsonc
+    fi
+    exec fastfetch
+  fi
+  echo "fastfetch no esta instalado." >&2
+  exit 1
+fi
+
+echo "Zentrix by Abraham Tobal"
+echo
+echo "Version: 1.0"
+echo "Base: Arch Linux"
+echo "Desktop: KDE Plasma"
+echo "Architecture: $arch_name"
+echo "Kernel: $kernel_name $kernel_release"
+echo "Packages: $pkg_count"
+echo "Developer: Abraham Tobal"
+
+echo
+if command -v fastfetch >/dev/null 2>&1; then
+  echo "Ejecutando Fastfetch con configuracion de Zentrix..."
+  if [[ -f /usr/share/zentrix/fastfetch.jsonc ]]; then
+    fastfetch --config /usr/share/zentrix/fastfetch.jsonc || true
+  else
+    fastfetch || true
+  fi
+fi

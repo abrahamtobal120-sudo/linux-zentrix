@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "--cli" ]]; then
+	cat <<'BANNER'
+╭────────────────────────────────────╮
+│     ZENTRIX by Abraham Tobal       │
+╰────────────────────────────────────╯
+
+Welcome to Zentrix.
+BANNER
+
+	echo
+	echo "Primeros pasos"
+	echo "- Conectarse a internet"
+	echo "- Actualizar Zentrix"
+	echo "- Instalar aplicaciones"
+	echo "- Configurar apariencia"
+	echo "- Informacion del sistema"
+	exit 0
+fi
+
+if command -v python3 >/dev/null 2>&1 && [[ -f /usr/local/lib/zentrix/zentrix_welcome.py ]]; then
+	exec python3 /usr/local/lib/zentrix/zentrix_welcome.py
+fi
+
+exec "$0" --cli

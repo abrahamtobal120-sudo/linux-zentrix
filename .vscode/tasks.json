@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Zentrix ISO",
+      "type": "shell",
+      "command": "./build.sh",
+      "options": {
+        "cwd": "${workspaceFolder}/zentrix-os"
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Clean Zentrix Build",
+      "type": "shell",
+      "command": "./clean.sh",
+      "options": {
+        "cwd": "${workspaceFolder}/zentrix-os"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test Zentrix ISO (QEMU)",
+      "type": "shell",
+      "command": "./test-qemu.sh",
+      "options": {
+        "cwd": "${workspaceFolder}/zentrix-os"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
