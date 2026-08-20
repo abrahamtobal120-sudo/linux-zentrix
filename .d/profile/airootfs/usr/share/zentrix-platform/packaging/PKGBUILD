@@ -1,0 +1,37 @@
+pkgname=zentrix-platform
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Zentrix Core service platform"
+arch=('x86_64')
+url="https://zentrix.local"
+license=('MIT')
+depends=('python' 'python-pyyaml' 'python-dbus-next' 'polkit' 'systemd')
+source=()
+sha256sums=()
+
+package() {
+  install -d "$pkgdir/usr/share/zentrix-platform"
+  cp -r "$srcdir"/* "$pkgdir/usr/share/zentrix-platform/"
+
+  install -d "$pkgdir/usr/lib/systemd/system"
+  install -m 644 "$srcdir/systemd/zentrix-core.service" "$pkgdir/usr/lib/systemd/system/"
+  install -m 644 "$srcdir/systemd/zentrix-core.path" "$pkgdir/usr/lib/systemd/system/"
+
+  install -d "$pkgdir/usr/share/polkit-1/actions"
+  install -m 644 "$srcdir/polkit/org.zentrix.core.policy" "$pkgdir/usr/share/polkit-1/actions/"
+
+  install -d "$pkgdir/usr/share/applications"
+  install -m 644 "$srcdir/packaging/applications/zentrix-control-center.desktop" "$pkgdir/usr/share/applications/"
+
+  install -d "$pkgdir/usr/share/dbus-1/system-services"
+  install -m 644 "$srcdir/packaging/dbus-1/system-services/org.zentrix.Core.service" "$pkgdir/usr/share/dbus-1/system-services/"
+
+  install -d "$pkgdir/etc/dbus-1/system.d"
+  install -m 644 "$srcdir/packaging/dbus-1/system.d/org.zentrix.Core.conf" "$pkgdir/etc/dbus-1/system.d/"
+
+  install -d "$pkgdir/usr/lib/tmpfiles.d"
+  install -m 644 "$srcdir/systemd/tmpfiles.d/zentrix-core.conf" "$pkgdir/usr/lib/tmpfiles.d/"
+
+  install -d "$pkgdir/etc/zentrix"
+  install -m 644 "$srcdir/packaging/etc/zentrix/zentrix.yaml" "$pkgdir/etc/zentrix/"
+}

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+THEME_DIR="/usr/share/grub/themes/zentrix"
+CFG_FILE="/etc/default/grub.d/zentrix.cfg"
+
+if [[ ! -f "$THEME_DIR/theme.txt" ]]; then
+  echo "[zentrix-apply-grub-theme][error] No existe $THEME_DIR/theme.txt" >&2
+  exit 1
+fi
+
+if [[ ! -f "$CFG_FILE" ]]; then
+  install -d -m 0755 /etc/default/grub.d
+  cat > "$CFG_FILE" <<'EOT'
+GRUB_DISTRIBUTOR="Zentrix"
+GRUB_THEME="/usr/share/grub/themes/zentrix/theme.txt"
+GRUB_TIMEOUT=5
+GRUB_TIMEOUT_STYLE=menu
+EOT
+fi
+
+if command -v grub-mkconfig >/dev/null 2>&1; then
+  if [[ -d /boot/grub ]]; then
+    grub-mkconfig -o /boot/grub/grub.cfg
+    echo "[zentrix-apply-grub-theme] GRUB actualizado"
+  else
+    echo "[zentrix-apply-grub-theme] /boot/grub no existe. Omite regeneracion."
+  fi
+else
+  echo "[zentrix-apply-grub-theme] grub-mkconfig no disponible."
+fi

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MARKER_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zentrix"
+MARKER_FILE="$MARKER_DIR/live-start-shown"
+mkdir -p "$MARKER_DIR"
+
+if [[ -f "$MARKER_FILE" ]]; then
+  exit 0
+fi
+
+if ! command -v kdialog >/dev/null 2>&1; then
+  : > "$MARKER_FILE"
+  exit 0
+fi
+
+TITLE="Welcome to Zentrix"
+TEXT="Choose what you want to do now:\n\n- Try Zentrix\n- Install Zentrix"
+
+if kdialog --title "$TITLE" --yes-label "Install Zentrix" --no-label "Try Zentrix" --yesno "$TEXT"; then
+  /usr/local/bin/zentrix-install || true
+fi
+
+: > "$MARKER_FILE"

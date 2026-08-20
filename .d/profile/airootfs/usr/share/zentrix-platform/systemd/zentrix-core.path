@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch Zentrix config changes
+
+[Path]
+PathModified=/etc/zentrix/zentrix.yaml
+Unit=zentrix-core.service
+
+[Install]
+WantedBy=multi-user.target

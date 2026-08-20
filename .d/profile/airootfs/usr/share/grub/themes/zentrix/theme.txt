@@ -1,0 +1,61 @@
+# Zentrix GRUB theme
+
+desktop-image: "background.png"
+desktop-color: "#090c12"
+terminal-box: "0 0 0 0"
+terminal-border: "0"
+
++ label {
+  top = 9%
+  left = 0
+  width = 100%
+  align = "center"
+  text = "ZENTRIX"
+  color = "#e8edf7"
+  font = "DejaVu Sans Bold 28"
+}
+
++ label {
+  top = 14%
+  left = 0
+  width = 100%
+  align = "center"
+  text = "by Abraham Tobal"
+  color = "#95a4ba"
+  font = "DejaVu Sans 14"
+}
+
++ image {
+  top = 18%
+  left = 50%-128
+  width = 256
+  height = 256
+  file = "logo.png"
+}
+
++ boot_menu {
+  left = 50%-300
+  top = 56%
+  width = 600
+  height = 220
+  item_font = "DejaVu Sans 16"
+  item_color = "#c8d3e3"
+  selected_item_color = "#ffffff"
+  selected_item_pixmap_style = "select_*.png"
+  item_height = 38
+  item_padding = 10
+  item_spacing = 4
+}
+
++ progress_bar {
+  id = "__timeout__"
+  left = 50%-300
+  top = 82%
+  width = 600
+  height = 14
+  font = "DejaVu Sans 11"
+  text_color = "#7aa6d6"
+  fg_color = "#1f8bff"
+  bg_color = "#1a2230"
+  border_color = "#2b3648"
+}

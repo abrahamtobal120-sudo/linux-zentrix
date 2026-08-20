@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Zentrix First Setup
+Comment=Choose the initial Zentrix profile on the first login
+Exec=/usr/local/bin/zentrix-first-setup-launcher
+OnlyShowIn=KDE;
+X-KDE-autostart-phase=2
+NoDisplay=false
+Terminal=false
+Categories=Settings;System;

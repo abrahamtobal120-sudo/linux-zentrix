@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+install -d -m 0755 /etc/sddm.conf.d
+rm -f /etc/sddm.conf.d/zentrix-live.conf
+cat > /etc/sddm.conf.d/zentrix.conf <<'EOT'
+[General]
+DisplayServer=x11
+
+[Theme]
+Current=zentrix
+EOT
+
+rm -f /etc/polkit-1/rules.d/49-zentrix-calamares.rules
+rm -f /usr/share/applications/zentrix-install.desktop
+rm -f /usr/local/bin/zentrix-install
+rm -f /usr/local/bin/zentrix-live-start
+rm -f /home/zentrix/Desktop/Install\ Zentrix.desktop
+rm -f /home/zentrix/.config/autostart/zentrix-live-start.desktop
+rm -f /home/zentrix/.bash_profile
+
+if id -u zentrix >/dev/null 2>&1; then
+  userdel -r zentrix || true
+fi

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zentrix Welcome
+Comment=Welcome, setup, and first steps for Zentrix
+Exec=zentrix-welcome
+Icon=help-about
+Terminal=false
+Categories=System;Settings;Utility;
+StartupNotify=true

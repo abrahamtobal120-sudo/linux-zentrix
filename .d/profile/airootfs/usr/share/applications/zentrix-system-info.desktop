@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zentrix System Info
+Comment=Show system information for Zentrix
+Exec=konsole -e zentrix-info --fastfetch
+Icon=computer
+Terminal=false
+Categories=System;Utility;
+StartupNotify=true

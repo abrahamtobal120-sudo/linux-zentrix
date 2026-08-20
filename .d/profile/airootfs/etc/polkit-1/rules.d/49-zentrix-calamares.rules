@@ -1,0 +1,10 @@
+// Allow launching Calamares from the live user without password prompts.
+polkit.addRule(function(action, subject) {
+  if (
+    action.id == "org.freedesktop.policykit.exec" &&
+    action.lookup("program") == "/usr/bin/calamares" &&
+    subject.user == "zentrix"
+  ) {
+    return polkit.Result.YES;
+  }
+});

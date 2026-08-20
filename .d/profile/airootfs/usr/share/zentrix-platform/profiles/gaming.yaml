@@ -1,0 +1,14 @@
+name: gaming
+summary: Optimize for game sessions and low latency.
+packages:
+  optional:
+    - gamemode
+    - mangohud
+    - gamescope
+services:
+  enable: []
+  disable: []
+power:
+  profile: performance
+ui:
+  reduce_animations: true

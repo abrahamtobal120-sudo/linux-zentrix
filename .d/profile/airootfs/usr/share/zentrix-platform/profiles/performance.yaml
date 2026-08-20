@@ -1,0 +1,14 @@
+name: performance
+summary: Prioritize responsiveness and raw performance.
+packages: []
+services:
+  enable: []
+  disable: []
+power:
+  profile: performance
+ui:
+  reduce_animations: false
+security:
+  strict_firewall: false
+warnings:
+  - Higher power consumption may reduce battery life.

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${USER:-}" == "zentrix" ]] || [[ -d /run/archiso ]]; then
+  exit 0
+fi
+
+marker_dir="${XDG_CONFIG_HOME:-$HOME/.config}/zentrix"
+marker_file="$marker_dir/first-setup-complete"
+
+if [[ -f "$marker_file" ]]; then
+  exit 0
+fi
+
+mkdir -p "$marker_dir"
+exec /usr/local/bin/zentrix-first-setup

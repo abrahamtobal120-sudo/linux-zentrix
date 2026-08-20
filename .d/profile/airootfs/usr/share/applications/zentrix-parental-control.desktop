@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zentrix Parental Control
+Comment=Open the Zentrix parental control tools
+Exec=zentrix-parental-control
+Icon=preferences-system
+Terminal=false
+Categories=System;
+StartupNotify=true

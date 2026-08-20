@@ -1,0 +1,14 @@
+name: creator
+summary: Workspace for multimedia, video, and design.
+packages:
+  optional:
+    - kdenlive
+    - gimp
+    - krita
+    - blender
+    - obs-studio
+services:
+  enable: []
+  disable: []
+power:
+  profile: performance

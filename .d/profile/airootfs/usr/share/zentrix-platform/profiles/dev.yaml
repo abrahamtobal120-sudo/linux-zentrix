@@ -1,0 +1,15 @@
+name: dev
+summary: Workspace for software development.
+packages:
+  optional:
+    - git
+    - python
+    - nodejs
+    - gcc
+    - cmake
+    - podman
+services:
+  enable: []
+  disable: []
+power:
+  profile: balanced

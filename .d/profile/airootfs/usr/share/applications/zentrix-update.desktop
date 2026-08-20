@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zentrix Update
+Comment=Update Zentrix safely with pacman
+Exec=konsole -e zentrix-update
+Icon=system-software-update
+Terminal=false
+Categories=Settings;System;
+StartupNotify=true

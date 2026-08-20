@@ -4,7 +4,7 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARCHISO_DIR="$PROJECT_ROOT/archiso"
 EXTRA_PACKAGES_FILE="$PROJECT_ROOT/packages/zentrix-extra.x86_64"
-STAGING_ROOT="$PROJECT_ROOT/.build"
+STAGING_ROOT="$PROJECT_ROOT/.d"
 STAGING_PROFILE="$STAGING_ROOT/profile"
 WORK_DIR="$PROJECT_ROOT/work"
 OUT_DIR="$PROJECT_ROOT/out"
@@ -18,11 +18,11 @@ CALAMARES_PACKAGE_GLOB="calamares-*.pkg.tar.zst"
 ZENTRIX_PLATFORM_DIR="$PROJECT_ROOT/zentrix-platform"
 
 log() {
-  printf '[build] %s\n' "$*"
+  printf '[d] %s\n' "$*"
 }
 
 fail() {
-  printf '[build][error] %s\n' "$*" >&2
+  printf '[d][error] %s\n' "$*" >&2
   exit 1
 }
 
@@ -110,6 +110,14 @@ EOF
 
 package_exists() {
   local package_name="$1"
+
+  # Calamares viene del repositorio local de Zentrix
+  if [[ "$package_name" == "calamares" && -n "$LOCAL_REPO_PATH" ]]; then
+    if compgen -G "$LOCAL_REPO_PATH/calamares-*.pkg.tar.zst" >/dev/null; then
+      return 0
+    fi
+  fi
+
   pacman --config "$STAGING_PROFILE/pacman.conf" -Si "$package_name" >/dev/null 2>&1
 }
 
@@ -164,7 +172,7 @@ merge_packages() {
 }
 
 sync_live_assets() {
-  log "Sincronizando logos y wallpapers al perfil de build..."
+  log "Sincronizando logos y wallpapers al perfil de d..."
   "$ASSET_SYNC_SCRIPT" "$PROJECT_ROOT" "$STAGING_PROFILE"
 }
 

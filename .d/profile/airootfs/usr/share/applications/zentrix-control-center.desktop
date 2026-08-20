@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zentrix Control Center
+Comment=Central system management for Zentrix
+Exec=zentrix-control-center
+Icon=preferences-system
+Terminal=false
+Categories=Settings;System;
+StartupNotify=true

@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.zentrix.Core
+Exec=/usr/bin/systemctl start zentrix-core.service
+User=root

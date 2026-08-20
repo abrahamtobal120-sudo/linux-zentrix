@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+"http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
+<policyconfig>
+  <vendor>Zentrix</vendor>
+  <vendor_url>https://zentrix.local</vendor_url>
+
+  <action id="org.zentrix.core.profile.apply">
+    <description>Apply Zentrix system profile</description>
+    <message>Authentication is required to apply Zentrix profile changes.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+  <action id="org.zentrix.core.drivers.install">
+    <description>Install recommended drivers from trusted sources</description>
+    <message>Authentication is required to install drivers.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+  <action id="org.zentrix.core.recovery.run">
+    <description>Run Zentrix recovery operation</description>
+    <message>Authentication is required to run recovery operations.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+</policyconfig>

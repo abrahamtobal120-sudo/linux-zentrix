@@ -1,0 +1,12 @@
+name: eco
+summary: Prioritize battery life and low background activity.
+packages: []
+services:
+  enable: []
+  disable: []
+power:
+  profile: power-saver
+ui:
+  reduce_animations: true
+security:
+  strict_firewall: true

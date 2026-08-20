@@ -1,0 +1,12 @@
+name: focus
+summary: Minimize distractions for focused sessions.
+packages: []
+services:
+  enable: []
+  disable: []
+power:
+  profile: power-saver
+ui:
+  reduce_animations: true
+focus:
+  durations: [25, 45, 60, 120]

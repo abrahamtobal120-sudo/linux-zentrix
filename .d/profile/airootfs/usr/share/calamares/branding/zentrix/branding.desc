@@ -1,0 +1,23 @@
+---
+componentName: zentrix
+welcomeStyleCalamares: true
+showSupportUrl: false
+showKnownIssuesUrl: false
+showReleaseNotesUrl: false
+strings:
+  productName:         Zentrix by Abraham Tobal
+  shortProductName:    Zentrix
+  version:             "1.0"
+  shortVersion:        "1.0"
+  versionedName:       Zentrix by Abraham Tobal 1.0
+  shortVersionedName:  Zentrix 1.0
+  bootloaderEntryName: Zentrix
+images:
+  productLogo:         "/usr/share/zentrix/logos/zentrix-main-logo.png"
+  productIcon:         "/usr/share/zentrix/logos/zentrix-main-logo.png"
+  productWelcome:      "/usr/share/zentrix/logos/zentrix-main-logo.png"
+style:
+  sidebarBackground: "#0c1017"
+  sidebarText: "#e8eef9"
+  sidebarTextSelect: "#ffffff"
+  sidebarTextHighlight: "#1f8bff"

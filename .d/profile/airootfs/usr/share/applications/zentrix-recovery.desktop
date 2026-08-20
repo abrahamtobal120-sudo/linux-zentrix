@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zentrix Recovery
+Comment=Open the Zentrix recovery tools
+Exec=zentrix-recovery
+Icon=preferences-system
+Terminal=false
+Categories=System;
+StartupNotify=true
