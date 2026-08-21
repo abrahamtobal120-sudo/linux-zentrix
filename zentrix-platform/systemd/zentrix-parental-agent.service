@@ -6,7 +6,8 @@ Wants=systemd-logind.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 -m daemon.parental_agent
+WorkingDirectory=/usr/share/zentrix-platform
+ExecStart=/usr/bin/python3 /usr/share/zentrix-platform/daemon/parental_agent.py
 Restart=on-failure
 RestartSec=5
 UMask=0077
