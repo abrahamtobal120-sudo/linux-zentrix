@@ -178,6 +178,7 @@ class ParentalRuntime:
             )
 
             old_day = str(meta.get("day", today))
+            day_changed = False
             # Never reset on a backwards or suspicious clock jump. A normal forward date
             # transition is allowed and is the only path that replenishes daily time.
             if today > old_day and not runtime["clock_anomaly"]:
@@ -189,9 +190,11 @@ class ParentalRuntime:
                     user_state["lock_reason"] = ""
                 meta["partial_seconds"] = 0.0
                 meta["day"] = today
+                meta["last_mono"] = mono
+                day_changed = True
 
             last_mono = float(meta.get("last_mono", mono) or mono)
-            elapsed = max(0.0, mono - last_mono)
+            elapsed = 0.0 if day_changed else max(0.0, mono - last_mono)
             meta["last_mono"] = mono
             meta["last_wall_epoch"] = wall_epoch
 
