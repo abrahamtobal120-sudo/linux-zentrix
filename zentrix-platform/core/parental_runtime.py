@@ -117,6 +117,13 @@ class ParentalRuntime:
             if self._inside_window(minute_now, start, end):
                 return "bedtime"
 
+        blocked_windows = screen_time.get("blocked_hours", []) or []
+        for window in blocked_windows:
+            start = self._minute_of_day(str(window["start"]))
+            end = self._minute_of_day(str(window["end"]))
+            if self._inside_window(minute_now, start, end):
+                return "blocked_schedule"
+
         windows = screen_time.get("allowed_hours", []) or []
         if windows:
             allowed = False
@@ -218,8 +225,6 @@ class ParentalRuntime:
 
             old_day = str(meta.get("day", today))
             day_changed = False
-            # Never reset on a backwards or suspicious clock jump. A normal forward date
-            # transition is allowed and is the only path that replenishes daily time.
             if today > old_day and not runtime["clock_anomaly"]:
                 limit = self._limit_for_today(screen_time, now)
                 user_state["remaining_minutes"] = limit
@@ -253,7 +258,6 @@ class ParentalRuntime:
                     )
                     self._record_usage_history(user_state, today, counted_minutes, now)
             elif not snapshot.countable:
-                # Idle, logged out and locked-session time must not accumulate.
                 meta["partial_seconds"] = 0.0
 
             should_lock = False
@@ -270,7 +274,7 @@ class ParentalRuntime:
             if should_lock:
                 user_state["locked"] = True
                 user_state["lock_reason"] = lock_reason
-            elif previous_locked and previous_reason in {"bedtime", "schedule"}:
+            elif previous_locked and previous_reason in {"bedtime", "schedule", "blocked_schedule"}:
                 user_state["locked"] = False
                 user_state["lock_reason"] = ""
 
