@@ -13,7 +13,7 @@ fi
 
 exec sudo -E python3 - <<'PY'
 import sys
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 from gui.parental_page import ParentalPage
 
 app = QtWidgets.QApplication(sys.argv)
@@ -23,7 +23,8 @@ window.resize(1100, 760)
 
 scroll = QtWidgets.QScrollArea()
 scroll.setWidgetResizable(True)
-scroll.setHorizontalScrollBarPolicy(QtWidgets.Qt.ScrollBarPolicy.ScrollBarAsNeeded) if hasattr(QtWidgets, "Qt") else None
+scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
 page = ParentalPage(local=True)
 page.refresh()
