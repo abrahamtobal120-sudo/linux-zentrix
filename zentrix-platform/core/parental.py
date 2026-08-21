@@ -22,6 +22,7 @@ ADMIN_GROUPS = {"wheel", "sudo"}
 @dataclass
 class ScreenTimeRule:
     daily_limit_minutes: int | None = None
+    weekly_limit_minutes: int | None = None
     by_day: dict[str, int] = field(default_factory=dict)
     allowed_hours: list[dict[str, str]] = field(default_factory=list)
     bedtime_start: str = ""
@@ -65,6 +66,7 @@ class ParentalStatus:
     remaining_minutes: int = 0
     daily_used_minutes: int = 0
     weekly_used_minutes: int = 0
+    weekly_remaining_minutes: int = 0
     locked: bool = False
     offline: bool = True
     last_sync: str = ""
@@ -193,13 +195,17 @@ class ParentalAgent:
         users = policy.selected_users
         current_user = state.get("current_user") or os.getenv("USER", "")
         user_state = state.get("users", {}).get(current_user, {}) if current_user in users else {}
+        weekly_limit = int((policy.screen_time or {}).get("weekly_limit_minutes", 0) or 0)
+        weekly_used = int(user_state.get("weekly_used_minutes", 0))
+        weekly_remaining = max(weekly_limit - weekly_used, 0) if weekly_limit > 0 else 0
         return ParentalStatus(
             enabled_users=users,
             current_user=current_user,
             mode=user_state.get("mode", "normal"),
             remaining_minutes=int(user_state.get("remaining_minutes", 0)),
             daily_used_minutes=int(user_state.get("daily_used_minutes", 0)),
-            weekly_used_minutes=int(user_state.get("weekly_used_minutes", 0)),
+            weekly_used_minutes=weekly_used,
+            weekly_remaining_minutes=weekly_remaining,
             locked=bool(user_state.get("locked", False)),
             offline=bool(state.get("offline", True)),
             last_sync=str(state.get("last_sync", "")),
@@ -252,6 +258,9 @@ class ParentalAgent:
         daily = screen_time.get("daily_limit_minutes")
         if daily is not None and not 0 <= int(daily) <= 1440:
             raise ValueError("daily_limit_minutes debe estar entre 0 y 1440")
+        weekly = screen_time.get("weekly_limit_minutes")
+        if weekly is not None and not 0 <= int(weekly) <= 10080:
+            raise ValueError("weekly_limit_minutes debe estar entre 0 y 10080")
         by_day = screen_time.get("by_day", {}) or {}
         if not isinstance(by_day, dict):
             raise ValueError("by_day debe ser un objeto")
@@ -266,6 +275,14 @@ class ParentalAgent:
         for window in allowed_hours:
             if not isinstance(window, dict) or "start" not in window or "end" not in window:
                 raise ValueError("Cada allowed_hours necesita start y end")
+            _parse_hhmm(str(window["start"]))
+            _parse_hhmm(str(window["end"]))
+        blocked_hours = screen_time.get("blocked_hours", []) or []
+        if not isinstance(blocked_hours, list):
+            raise ValueError("blocked_hours debe ser una lista")
+        for window in blocked_hours:
+            if not isinstance(window, dict) or "start" not in window or "end" not in window:
+                raise ValueError("Cada blocked_hours necesita start y end")
             _parse_hhmm(str(window["start"]))
             _parse_hhmm(str(window["end"]))
         bedtime_start = str(screen_time.get("bedtime_start", "") or "")
@@ -324,6 +341,7 @@ class ParentalAgent:
                     "remaining_minutes": int(document.screen_time.get("daily_limit_minutes", 0) or 0),
                     "daily_used_minutes": 0,
                     "weekly_used_minutes": 0,
+                    "weekly_remaining_minutes": int(document.screen_time.get("weekly_limit_minutes", 0) or 0),
                     "usage_by_date": {},
                     "locked": False,
                     "lock_reason": "",
@@ -374,7 +392,7 @@ class ParentalAgent:
         state = self.store.load_state()
         user_state = state.setdefault("users", {}).setdefault(
             user,
-            {"remaining_minutes": 0, "daily_used_minutes": 0, "weekly_used_minutes": 0, "usage_by_date": {}, "locked": False, "lock_reason": "", "mode": "normal"},
+            {"remaining_minutes": 0, "daily_used_minutes": 0, "weekly_used_minutes": 0, "weekly_remaining_minutes": 0, "usage_by_date": {}, "locked": False, "lock_reason": "", "mode": "normal"},
         )
         user_state["mode"] = mode
         self.save_state(state)
@@ -385,7 +403,7 @@ class ParentalAgent:
         state = self.store.load_state()
         user_state = state.setdefault("users", {}).setdefault(
             user,
-            {"remaining_minutes": 0, "daily_used_minutes": 0, "weekly_used_minutes": 0, "usage_by_date": {}, "locked": False, "lock_reason": "", "mode": "normal"},
+            {"remaining_minutes": 0, "daily_used_minutes": 0, "weekly_used_minutes": 0, "weekly_remaining_minutes": 0, "usage_by_date": {}, "locked": False, "lock_reason": "", "mode": "normal"},
         )
         user_state["locked"] = locked
         user_state["lock_reason"] = reason if locked else ""
@@ -415,22 +433,34 @@ class ParentalAgent:
         self._assert_controllable_user(user)
         if minutes < 0:
             raise ValueError("minutes no puede ser negativo")
+        policy = self.store.load_policy()
         state = self.store.load_state()
         user_state = state.setdefault("users", {}).setdefault(
             user,
-            {"remaining_minutes": 0, "daily_used_minutes": 0, "weekly_used_minutes": 0, "usage_by_date": {}, "locked": False, "lock_reason": "", "mode": "normal"},
+            {"remaining_minutes": 0, "daily_used_minutes": 0, "weekly_used_minutes": 0, "weekly_remaining_minutes": 0, "usage_by_date": {}, "locked": False, "lock_reason": "", "mode": "normal"},
         )
         user_state["daily_used_minutes"] = int(user_state.get("daily_used_minutes", 0)) + minutes
         user_state["weekly_used_minutes"] = int(user_state.get("weekly_used_minutes", 0)) + minutes
         remaining = max(int(user_state.get("remaining_minutes", 0)) - minutes, 0)
         user_state["remaining_minutes"] = remaining
-        if remaining <= 0:
+        weekly_limit = int((policy.screen_time or {}).get("weekly_limit_minutes", 0) or 0)
+        weekly_remaining = max(weekly_limit - int(user_state["weekly_used_minutes"]), 0) if weekly_limit > 0 else 0
+        user_state["weekly_remaining_minutes"] = weekly_remaining
+        if weekly_limit > 0 and weekly_remaining <= 0:
+            user_state["locked"] = True
+            user_state["lock_reason"] = "weekly_time_limit"
+        elif remaining <= 0:
             user_state["locked"] = True
             user_state["lock_reason"] = "time_limit"
         self.save_state(state)
         if user_state["locked"]:
-            self.set_locked(user, True, reason="time_limit")
-        return {"ok": True, "user": user, "remaining_minutes": remaining}
+            self.set_locked(user, True, reason=str(user_state["lock_reason"]))
+        return {
+            "ok": True,
+            "user": user,
+            "remaining_minutes": remaining,
+            "weekly_remaining_minutes": weekly_remaining,
+        }
 
     def request_extra_time(self, minutes: int, user: str | None = None) -> dict[str, Any]:
         if minutes <= 0 or minutes > 1440:
@@ -458,6 +488,7 @@ class ParentalAgent:
                 "school_mode_users": [],
                 "screen_time": {
                     "daily_limit_minutes": 180,
+                    "weekly_limit_minutes": 900,
                     "by_day": {"mon": 180, "tue": 180, "wed": 180, "thu": 180, "fri": 180},
                     "allowed_hours": [{"start": "07:00", "end": "21:00"}],
                     "bedtime_start": "21:00",
