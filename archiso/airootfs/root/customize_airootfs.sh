@@ -34,11 +34,9 @@ configure_live_user() {
   install -d -m 0755 -o "$user" -g "$user" "/home/$user/Desktop"
   install -d -m 0755 -o "$user" -g "$user" "/home/$user/.config/autostart"
 
-  # Do not hardcode passwords; live login is handled by SDDM autologin.
   passwd -l "$user" >/dev/null 2>&1 || true
 
   cat > "/home/$user/.bash_profile" <<'EOT'
-# Auto-start KDE Plasma only for the temporary live user on tty1.
 if [[ -z "${DISPLAY:-}" && "$(tty)" == "/dev/tty1" ]]; then
   if command -v startplasma-x11 >/dev/null 2>&1; then
     exec dbus-run-session startplasma-x11
@@ -85,13 +83,13 @@ EOT
 }
 
 configure_sddm() {
-  log "Configurando SDDM para sesion live"
+  log "Configurando SDDM para sesion live X11"
 
   install -d -m 0755 /etc/sddm.conf.d
   cat > /etc/sddm.conf.d/zentrix-live.conf <<'EOT'
 [Autologin]
 User=zentrix
-Session=plasma.desktop
+Session=plasmax11.desktop
 
 [General]
 DisplayServer=x11
@@ -101,8 +99,6 @@ Current=zentrix
 EOT
 
   enable_if_present "sddm.service"
-
-  # Prevent conflicts with getty on tty1 when display manager is active.
   disable_if_present "getty@tty1.service"
 }
 
@@ -119,11 +115,11 @@ main() {
   configure_identity
   configure_live_user
 
-  # Enable only essential services if corresponding packages are in the image.
   enable_if_present "NetworkManager.service"
   enable_if_present "bluetooth.service"
   enable_if_present "zentrix-core.service"
   enable_if_present "zentrix-core.path"
+  enable_if_present "zentrix-parental-agent.service"
   configure_sddm
   configure_plymouth
 
