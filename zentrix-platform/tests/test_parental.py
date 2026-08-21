@@ -140,12 +140,17 @@ def test_runtime_counts_only_active_non_idle_time(tmp_path: Path) -> None:
     fake_time.advance(60)
     result = runtime.tick()
     assert result["users"]["kid"]["counted_minutes"] == 1
-    assert agent.store.load_state()["users"]["kid"]["remaining_minutes"] == 9
+    assert result["users"]["kid"]["weekly_used_minutes"] == 1
+    state = agent.store.load_state()["users"]["kid"]
+    assert state["remaining_minutes"] == 9
+    assert state["weekly_used_minutes"] == 1
 
     probe.idle = True
     fake_time.advance(120)
     runtime.tick()
-    assert agent.store.load_state()["users"]["kid"]["remaining_minutes"] == 9
+    state = agent.store.load_state()["users"]["kid"]
+    assert state["remaining_minutes"] == 9
+    assert state["weekly_used_minutes"] == 1
 
 
 def test_runtime_does_not_count_logged_out_or_suspended_gap(tmp_path: Path) -> None:
@@ -181,6 +186,49 @@ def test_runtime_bedtime_locks_controlled_user(tmp_path: Path) -> None:
     assert result["users"]["kid"]["locked"] is True
     assert result["users"]["kid"]["lock_reason"] == "bedtime"
     assert probe.locked_users == ["kid"]
+
+
+def test_runtime_allowed_hours_lock_outside_range(tmp_path: Path) -> None:
+    agent = ParentalAgent(ParentalPolicyStore(tmp_path))
+    agent.save_policy_document(
+        {
+            "selected_users": ["kid"],
+            "screen_time": {
+                "daily_limit_minutes": 120,
+                "allowed_hours": [{"start": "17:00", "end": "20:00"}],
+            },
+            "apps": [],
+            "internet": {"mode": "allow"},
+        }
+    )
+    fake_time = FakeTime(datetime(2026, 8, 20, 15, 30, 0))
+    probe = FakeProbe()
+    runtime = ParentalRuntime(agent, probe=probe, wall_clock=fake_time.now, monotonic=fake_time.monotonic)
+    result = runtime.tick()
+    assert result["users"]["kid"]["locked"] is True
+    assert result["users"]["kid"]["lock_reason"] == "schedule"
+
+
+def test_runtime_blocked_hours_override_allowed_range(tmp_path: Path) -> None:
+    agent = ParentalAgent(ParentalPolicyStore(tmp_path))
+    agent.save_policy_document(
+        {
+            "selected_users": ["kid"],
+            "screen_time": {
+                "daily_limit_minutes": 120,
+                "allowed_hours": [{"start": "07:00", "end": "22:00"}],
+                "blocked_hours": [{"start": "14:00", "end": "16:00"}],
+            },
+            "apps": [],
+            "internet": {"mode": "allow"},
+        }
+    )
+    fake_time = FakeTime(datetime(2026, 8, 20, 15, 0, 0))
+    probe = FakeProbe()
+    runtime = ParentalRuntime(agent, probe=probe, wall_clock=fake_time.now, monotonic=fake_time.monotonic)
+    result = runtime.tick()
+    assert result["users"]["kid"]["locked"] is True
+    assert result["users"]["kid"]["lock_reason"] == "blocked_schedule"
 
 
 def test_runtime_normal_day_change_resets_limit(tmp_path: Path) -> None:
