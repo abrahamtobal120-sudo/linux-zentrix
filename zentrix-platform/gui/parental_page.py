@@ -84,9 +84,17 @@ class ParentalPage(QtWidgets.QWidget):
         controls_layout = QtWidgets.QGridLayout(controls)
         self.users_edit = QtWidgets.QLineEdit()
         self.users_edit.setPlaceholderText("kid1,kid2")
+
         self.daily_limit_edit = QtWidgets.QSpinBox()
         self.daily_limit_edit.setRange(0, 1440)
         self.daily_limit_edit.setValue(180)
+        self.daily_limit_edit.setSuffix(" min")
+
+        self.weekly_limit_edit = QtWidgets.QSpinBox()
+        self.weekly_limit_edit.setRange(0, 10080)
+        self.weekly_limit_edit.setValue(900)
+        self.weekly_limit_edit.setSuffix(" min")
+        self.weekly_limit_edit.setSpecialValueText("Sin límite semanal")
 
         self.allowed_hours_edit = QtWidgets.QLineEdit()
         self.allowed_hours_edit.setPlaceholderText("06:30-07:20, 17:45-21:30")
@@ -116,19 +124,21 @@ class ParentalPage(QtWidgets.QWidget):
         controls_layout.addWidget(self.users_edit, 0, 1)
         controls_layout.addWidget(QtWidgets.QLabel("Daily limit"), 1, 0)
         controls_layout.addWidget(self.daily_limit_edit, 1, 1)
-        controls_layout.addWidget(QtWidgets.QLabel("Allowed hours"), 2, 0)
-        controls_layout.addWidget(self.allowed_hours_edit, 2, 1)
-        controls_layout.addWidget(QtWidgets.QLabel("Blocked hours"), 3, 0)
-        controls_layout.addWidget(self.blocked_hours_edit, 3, 1)
-        controls_layout.addWidget(schedule_help, 4, 0, 1, 2)
-        controls_layout.addWidget(QtWidgets.QLabel("School user"), 5, 0)
-        controls_layout.addWidget(self.school_user_edit, 5, 1)
-        controls_layout.addWidget(QtWidgets.QLabel("Apps"), 6, 0)
-        controls_layout.addWidget(self.apps_edit, 6, 1)
-        controls_layout.addWidget(QtWidgets.QLabel("Internet"), 7, 0)
-        controls_layout.addWidget(self.internet_edit, 7, 1)
-        controls_layout.addWidget(save_policy_button, 8, 0)
-        controls_layout.addWidget(lock_button, 8, 1)
+        controls_layout.addWidget(QtWidgets.QLabel("Weekly limit"), 2, 0)
+        controls_layout.addWidget(self.weekly_limit_edit, 2, 1)
+        controls_layout.addWidget(QtWidgets.QLabel("Allowed hours"), 3, 0)
+        controls_layout.addWidget(self.allowed_hours_edit, 3, 1)
+        controls_layout.addWidget(QtWidgets.QLabel("Blocked hours"), 4, 0)
+        controls_layout.addWidget(self.blocked_hours_edit, 4, 1)
+        controls_layout.addWidget(schedule_help, 5, 0, 1, 2)
+        controls_layout.addWidget(QtWidgets.QLabel("School user"), 6, 0)
+        controls_layout.addWidget(self.school_user_edit, 6, 1)
+        controls_layout.addWidget(QtWidgets.QLabel("Apps"), 7, 0)
+        controls_layout.addWidget(self.apps_edit, 7, 1)
+        controls_layout.addWidget(QtWidgets.QLabel("Internet"), 8, 0)
+        controls_layout.addWidget(self.internet_edit, 8, 1)
+        controls_layout.addWidget(save_policy_button, 9, 0)
+        controls_layout.addWidget(lock_button, 9, 1)
 
         layout.addWidget(title)
         layout.addWidget(self.summary)
@@ -198,25 +208,34 @@ class ParentalPage(QtWidgets.QWidget):
             f"Modo: {status.get('mode', 'normal')}"
         )
         self.quick_actions.setText(
-            f"Restante: {status.get('remaining_minutes', 0)} min | "
+            f"Restante hoy: {status.get('remaining_minutes', 0)} min | "
             f"Usado hoy: {status.get('daily_used_minutes', 0)} min | "
             f"Bloqueado: {'si' if status.get('locked') else 'no'}"
         )
 
+        screen_time = policy.get("screen_time", {}) or {}
+        weekly_limit = int(screen_time.get("weekly_limit_minutes", 0) or 0)
         weekly_parts = []
         state_users = state.get("users", {}) if isinstance(state, dict) else {}
         for user in policy.get("selected_users", []):
             user_state = state_users.get(user, {})
-            weekly_parts.append(
-                f"{user}: {self._format_minutes(int(user_state.get('weekly_used_minutes', 0) or 0))}"
-            )
+            weekly_used = int(user_state.get("weekly_used_minutes", 0) or 0)
+            if weekly_limit > 0:
+                weekly_remaining = max(weekly_limit - weekly_used, 0)
+                weekly_parts.append(
+                    f"{user}: usado {self._format_minutes(weekly_used)} / "
+                    f"límite {self._format_minutes(weekly_limit)} / "
+                    f"restante {self._format_minutes(weekly_remaining)}"
+                )
+            else:
+                weekly_parts.append(f"{user}: usado {self._format_minutes(weekly_used)} / sin límite semanal")
         self.weekly_summary.setText(
-            "Tiempo acumulado esta semana: " + (" | ".join(weekly_parts) if weekly_parts else "sin usuarios controlados")
+            "Tiempo semanal: " + (" | ".join(weekly_parts) if weekly_parts else "sin usuarios controlados")
         )
 
-        screen_time = policy.get("screen_time", {}) or {}
         self.users_edit.setText(",".join(policy.get("selected_users", [])))
         self.daily_limit_edit.setValue(int(screen_time.get("daily_limit_minutes", 180) or 0))
+        self.weekly_limit_edit.setValue(int(screen_time.get("weekly_limit_minutes", 0) or 0))
         self.allowed_hours_edit.setText(self._format_ranges(screen_time.get("allowed_hours", [])))
         self.blocked_hours_edit.setText(self._format_ranges(screen_time.get("blocked_hours", [])))
         school_mode_users = policy.get("school_mode_users", [])
@@ -243,6 +262,7 @@ class ParentalPage(QtWidgets.QWidget):
             current_screen_time.update(
                 {
                     "daily_limit_minutes": int(self.daily_limit_edit.value()),
+                    "weekly_limit_minutes": int(self.weekly_limit_edit.value()),
                     "allowed_hours": self._parse_ranges(self.allowed_hours_edit.text()),
                     "blocked_hours": self._parse_ranges(self.blocked_hours_edit.text()),
                 }
