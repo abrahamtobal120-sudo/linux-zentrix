@@ -195,6 +195,7 @@ class ParentalRuntime:
 
         results: dict[str, Any] = {"users": {}, "clock_anomaly": runtime["clock_anomaly"]}
         screen_time = policy.screen_time or {}
+        weekly_limit = max(0, int(screen_time.get("weekly_limit_minutes", 0) or 0))
 
         for user in policy.selected_users:
             if user in GUEST_USERS or is_admin_user(user):
@@ -206,6 +207,8 @@ class ParentalRuntime:
                 {
                     "remaining_minutes": self._limit_for_today(screen_time, now),
                     "daily_used_minutes": 0,
+                    "weekly_used_minutes": 0,
+                    "weekly_remaining_minutes": weekly_limit,
                     "usage_by_date": {},
                     "locked": False,
                     "lock_reason": "",
@@ -237,6 +240,12 @@ class ParentalRuntime:
                 meta["last_mono"] = mono
                 day_changed = True
 
+            weekly_used_before = self._weekly_used_minutes(user_state, now)
+            if weekly_limit <= 0 or weekly_used_before < weekly_limit:
+                if user_state.get("lock_reason") == "weekly_time_limit":
+                    user_state["locked"] = False
+                    user_state["lock_reason"] = ""
+
             last_mono = float(meta.get("last_mono", mono) or mono)
             elapsed = 0.0 if day_changed else max(0.0, mono - last_mono)
             meta["last_mono"] = mono
@@ -260,11 +269,19 @@ class ParentalRuntime:
             elif not snapshot.countable:
                 meta["partial_seconds"] = 0.0
 
+            weekly_used = self._weekly_used_minutes(user_state, now)
+            weekly_remaining = max(weekly_limit - weekly_used, 0) if weekly_limit > 0 else 0
+            user_state["weekly_used_minutes"] = weekly_used
+            user_state["weekly_remaining_minutes"] = weekly_remaining
+
             should_lock = False
             lock_reason = ""
             if reason:
                 should_lock = True
                 lock_reason = reason
+            elif weekly_limit > 0 and weekly_remaining <= 0:
+                should_lock = True
+                lock_reason = "weekly_time_limit"
             elif int(user_state.get("remaining_minutes", 0)) <= 0:
                 should_lock = True
                 lock_reason = "time_limit"
@@ -274,12 +291,10 @@ class ParentalRuntime:
             if should_lock:
                 user_state["locked"] = True
                 user_state["lock_reason"] = lock_reason
-            elif previous_locked and previous_reason in {"bedtime", "schedule", "blocked_schedule"}:
+            elif previous_locked and previous_reason in {"bedtime", "schedule", "blocked_schedule", "weekly_time_limit"}:
                 user_state["locked"] = False
                 user_state["lock_reason"] = ""
 
-            weekly_used = self._weekly_used_minutes(user_state, now)
-            user_state["weekly_used_minutes"] = weekly_used
             results["users"][user] = {
                 "active": snapshot.active,
                 "idle": snapshot.idle,
@@ -288,6 +303,7 @@ class ParentalRuntime:
                 "remaining_minutes": int(user_state.get("remaining_minutes", 0)),
                 "daily_used_minutes": int(user_state.get("daily_used_minutes", 0)),
                 "weekly_used_minutes": weekly_used,
+                "weekly_remaining_minutes": weekly_remaining,
                 "locked": bool(user_state.get("locked", False)),
                 "lock_reason": str(user_state.get("lock_reason", "")),
             }
