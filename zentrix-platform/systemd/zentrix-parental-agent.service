@@ -1,12 +1,27 @@
 [Unit]
 Description=Zentrix Parental Control Local Agent
-After=local-fs.target network.target
+Documentation=man:systemd.service(5)
+After=local-fs.target systemd-logind.service
+Wants=systemd-logind.service
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/python3 -m daemon.parental_agent
 Restart=on-failure
 RestartSec=5
+UMask=0077
+StateDirectory=zentrix-parental
+StateDirectoryMode=0700
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+ReadWritePaths=/var/lib/zentrix-parental
 
 [Install]
 WantedBy=multi-user.target
