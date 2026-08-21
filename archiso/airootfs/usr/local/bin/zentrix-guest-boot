@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -e
+
+if ! grep -qw "zentrix_guest=1" /proc/cmdline; then
+    exit 0
+fi
+
+echo "[Zentrix] Activando Guest Mode"
+
+if ! id guest >/dev/null 2>&1; then
+    useradd -m -s /bin/bash guest
+fi
+
+passwd -d guest >/dev/null 2>&1 || true
+
+mkdir -p /etc/sddm.conf.d
+
+cat > /etc/sddm.conf.d/99-zentrix-guest.conf <<'EOF'
+[Autologin]
+User=guest
+Session=plasma
+Relogin=false
+EOF
+
+# Guest no debe pertenecer a grupos administrativos
+gpasswd -d guest wheel >/dev/null 2>&1 || true
+gpasswd -d guest sudo >/dev/null 2>&1 || true
+
+chown -R guest:guest /home/guest

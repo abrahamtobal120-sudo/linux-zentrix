@@ -34,6 +34,7 @@ except ModuleNotFoundError:
     QtWidgets = _MissingQtModule()
 
 from api.client import build_client, run
+from gui.parental_page import ParentalPage
 
 
 APP_TITLE = "Zentrix Control Center"
@@ -314,7 +315,7 @@ class ControlCenter(QtWidgets.QMainWindow):
         sub.setObjectName("sidebarSubtitle")
 
         self.nav = QtWidgets.QListWidget()
-        self.nav.addItems(["Dashboard", "Profiles", "Updates", "Drivers", "About"])
+        self.nav.addItems(["Dashboard", "Profiles", "Parental Control", "Updates", "Drivers", "About"])
         self.nav.currentRowChanged.connect(self._switch_page)
 
         refresh_button = QtWidgets.QPushButton("Refresh")
@@ -348,9 +349,10 @@ class ControlCenter(QtWidgets.QMainWindow):
                 ("Search Online Drivers", "Reserved safe entry point for trusted-source search.", ["konsole", "-e", "zentrixctl", "module", "info", "drivers"]),
             ],
         )
+        self.parental_page = ParentalPage(local=self.local)
         self.about_page = AboutPage()
 
-        for page in [self.dashboard_page, self.profiles_page, self.updates_page, self.drivers_page, self.about_page]:
+        for page in [self.dashboard_page, self.profiles_page, self.parental_page, self.updates_page, self.drivers_page, self.about_page]:
             self.pages.addWidget(page)
 
         root.addWidget(sidebar, 1)
@@ -431,6 +433,7 @@ class ControlCenter(QtWidgets.QMainWindow):
 
         self.dashboard_page.update_view(snapshot)
         self.profiles_page.update_view(snapshot)
+        self.parental_page.refresh()
 
     def _apply_profile(self, name: str, dry_run: bool) -> None:
         try:

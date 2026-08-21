@@ -5,6 +5,38 @@ MARKER_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zentrix"
 MARKER_FILE="$MARKER_DIR/live-start-shown"
 mkdir -p "$MARKER_DIR"
 
+wait_for_plasma() {
+  local attempts=60
+
+  while (( attempts > 0 )); do
+    if pgrep -x plasmashell >/dev/null 2>&1 || pgrep -x kwin_x11 >/dev/null 2>&1 || pgrep -x kwin_wayland >/dev/null 2>&1; then
+      return 0
+    fi
+
+    sleep 1
+    ((attempts--))
+  done
+
+  return 0
+}
+
+launch_install() {
+  (
+    wait_for_plasma
+    /usr/local/bin/zentrix-install || true
+  ) >/dev/null 2>&1 &
+}
+
+if grep -qw "zentrix_guest=1" /proc/cmdline; then
+  exit 0
+fi
+
+if grep -qw "zentrix_install=1" /proc/cmdline; then
+  : > "$MARKER_FILE"
+  launch_install
+  exit 0
+fi
+
 if [[ -f "$MARKER_FILE" ]]; then
   exit 0
 fi

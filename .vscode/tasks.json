@@ -1,33 +1,89 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Build Zentrix ISO",
-      "type": "shell",
-      "command": "./build.sh",
-      "options": {
-        "cwd": "${workspaceFolder}/zentrix-os"
-      },
-      "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "Clean Zentrix Build",
-      "type": "shell",
-      "command": "./clean.sh",
-      "options": {
-        "cwd": "${workspaceFolder}/zentrix-os"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Test Zentrix ISO (QEMU)",
-      "type": "shell",
-      "command": "./test-qemu.sh",
-      "options": {
-        "cwd": "${workspaceFolder}/zentrix-os"
-      },
-      "problemMatcher": []
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Zentrix ISO",
+			"type": "shell",
+			"command": "./build.sh",
+			"options": {
+				"cwd": "${workspaceFolder}/zentrix-os"
+			},
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Clean Zentrix Build",
+			"type": "shell",
+			"command": "./clean.sh",
+			"options": {
+				"cwd": "${workspaceFolder}/zentrix-os"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Test Zentrix ISO (QEMU)",
+			"type": "shell",
+			"command": "./test-qemu.sh",
+			"options": {
+				"cwd": "${workspaceFolder}/zentrix-os"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "pytest-parental-stage1",
+			"type": "shell",
+			"command": "cd /home/abrahamt/Escritorio/zentrix-by-abraham-tobal/zentrix-os/zentrix-platform && python3 -m pytest tests/test_parental.py",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-parental-selftest",
+			"type": "shell",
+			"command": "cd /home/abrahamt/Escritorio/zentrix-by-abraham-tobal/zentrix-os/zentrix-platform && python3 - <<'PY'\nfrom pathlib import Path\nimport tempfile\nfrom core.parental import ParentalAgent, ParentalPolicyStore\n\nwith tempfile.TemporaryDirectory() as tmp:\n    store = ParentalPolicyStore(Path(tmp))\n    agent = ParentalAgent(store)\n    agent.apply_demo_policy(['kid'])\n    status = agent.status()\n    assert 'kid' in status.enabled_users\n    assert status.remaining_minutes == 180\n    assert agent.request_extra_time(15, user='kid')['ok'] is True\n    agent.set_user_mode('kid', 'school')\n    agent.record_usage('kid', 180)\n    status = agent.status()\n    assert status.locked is True\n    assert store.lock_file.exists()\nprint('parental selftest ok')\nPY",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-parental-selftest-2",
+			"type": "shell",
+			"command": "cd /home/abrahamt/Escritorio/zentrix-by-abraham-tobal/zentrix-os/zentrix-platform && python3 - <<'PY'\nfrom pathlib import Path\nimport tempfile\nfrom core.parental import ParentalAgent, ParentalPolicyStore\n\nwith tempfile.TemporaryDirectory() as tmp:\n    store = ParentalPolicyStore(Path(tmp))\n    agent = ParentalAgent(store)\n    agent.apply_demo_policy(['kid'])\n    status = agent.status()\n    assert 'kid' in status.enabled_users\n    assert status.remaining_minutes == 180\n    assert agent.request_extra_time(15, user='kid')['ok'] is True\n    agent.set_user_mode('kid', 'school')\n    agent.record_usage('kid', 180)\n    status = agent.status()\n    assert status.locked is True\n    assert store.lock_file.exists()\nprint('parental selftest ok')\nPY",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "parental-selftest-stage1b",
+			"type": "shell",
+			"command": "cd /home/abrahamt/Escritorio/zentrix-by-abraham-tobal/zentrix-os/zentrix-platform && python3 - <<'PY'\nfrom pathlib import Path\nimport tempfile\nfrom core.parental import ParentalAgent, ParentalPolicyStore\n\nwith tempfile.TemporaryDirectory() as tmp:\n    agent = ParentalAgent(ParentalPolicyStore(Path(tmp)))\n    agent.apply_demo_policy(['kid'])\n    agent.update_apps([{'identifier':'/usr/bin/firefox','action':'allow','category':'education','always_allowed':True}])\n    agent.update_internet({'mode':'pause','allowed_domains':['wikipedia.org'],'blocked_domains':['youtube.com']})\n    agent.set_school_mode('kid', True)\n    status = agent.status()\n    assert status.mode == 'school'\n    assert agent.show_policy()['internet']['mode'] == 'pause'\n    assert agent.show_policy()['apps'][0]['identifier'] == '/usr/bin/firefox'\nprint('parental stage1b selftest ok')\nPY",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "parental-ui-selftest",
+			"type": "shell",
+			"command": "cd /home/abrahamt/Escritorio/zentrix-by-abraham-tobal/zentrix-os/zentrix-platform && python3 - <<'PY'\nfrom pathlib import Path\nimport tempfile\nfrom core.parental import ParentalAgent, ParentalPolicyStore\n\nwith tempfile.TemporaryDirectory() as tmp:\n    agent = ParentalAgent(ParentalPolicyStore(Path(tmp)))\n    agent.save_policy_document({'selected_users':['kid'], 'school_mode_users':['kid'], 'screen_time':{'daily_limit_minutes':90}, 'apps':[], 'internet':{'mode':'allow'}})\n    assert agent.status().remaining_minutes == 90\n    agent.set_locked('kid', True)\n    assert agent.diagnostics()['lockscreen_file_exists'] is True\nprint('parental ui selftest ok')\nPY",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "stage2-remote-selftest",
+			"type": "shell",
+			"command": "cd /home/abrahamt/Escritorio/zentrix-by-abraham-tobal/zentrix-os/zentrix-platform && python3 - <<'PY'\nfrom pathlib import Path\nimport tempfile\nfrom core.parental_remote import RemoteParentalManager, RemoteStore\n\nwith tempfile.TemporaryDirectory() as tmp:\n    manager = RemoteParentalManager(RemoteStore(Path(tmp)))\n    family = manager.create_family('Family', 'parent')\n    device, code = manager.create_device(family.family_id, 'Abraham-PC')\n    assert manager.pair_device(code)['ok'] is True\n    assert manager.pair_device(code)['ok'] is False\n    command = manager.queue_command(device.device_id, 'extra_time', {'minutes': 15})\n    assert manager.mark_executed(command.command_id)['duplicate'] is False\n    assert manager.mark_executed(command.command_id)['duplicate'] is True\n    assert manager.sync_status(device.device_id, 'Online', offline=False)['status'] == 'Online'\nprint('stage2 remote selftest ok')\nPY",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "supabase-config-selftest",
+			"type": "shell",
+			"command": "cd /home/abrahamt/Escritorio/zentrix-by-abraham-tobal/zentrix-os/zentrix-platform && python3 - <<'PY'\nfrom pathlib import Path\nimport tempfile\nfrom core.parental_remote import RemoteParentalManager, RemoteStore, SupabaseConfigStore\n\nwith tempfile.TemporaryDirectory() as tmp:\n    tmp_path = Path(tmp)\n    manager = RemoteParentalManager(RemoteStore(tmp_path))\n    manager.config_store = SupabaseConfigStore(tmp_path / 'parental-supabase.json')\n    save = manager.save_supabase_config('https://example.supabase.co', 'anon-key', 'example', 'Familia Zentrix', 'parent')\n    assert save['ok'] is True\n    validation = manager.validate_supabase_config()\n    assert validation['ok'] is True\n    loaded = manager.load_supabase_config()\n    assert loaded.family_name == 'Familia Zentrix'\nprint('supabase config selftest ok')\nPY",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
 }

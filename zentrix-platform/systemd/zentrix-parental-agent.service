@@ -1,0 +1,12 @@
+[Unit]
+Description=Zentrix Parental Control Local Agent
+After=local-fs.target network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -m daemon.parental_agent
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

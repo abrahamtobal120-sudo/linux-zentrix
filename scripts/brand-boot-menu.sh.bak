@@ -17,52 +17,23 @@ log() {
   printf '[brand-boot-menu] %s\n' "$*"
 }
 
-patch_file_if_exists() {
-  local file="$1"
-
-  if [[ -f "$file" ]]; then
-    log "Actualizando: $file"
-
-    case "$file" in
-      *.cfg)
-        sed -i \
-          -e 's/^MENU TITLE .*/MENU TITLE ZENTRIX/' \
-          -e 's/Boot Arch Linux (x86_64)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (%ARCH%, BIOS) with \^speech/Zentrix Live with ^speech/g' \
-          -e 's/Arch Linux install medium (%ARCH%, BIOS)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (%ARCH%, NBD)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (%ARCH%, NFS)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (%ARCH%, HTTP)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (x86_64, UEFI)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (x86_64)/Zentrix Live/g' \
-          "$file"
-        ;;
-    esac
-  fi
-}
-
 patch_systemd_boot_entries() {
   local dir="$1"
-
   [[ -d "$dir" ]] || return 0
 
   local f
-
   for f in "$dir"/*.conf; do
     [[ -f "$f" ]] || continue
 
     log "Ajustando entrada UEFI: $f"
 
-    if grep -qi 'zentrix_install=1' "$f"; then
-      sed -i -E 's/^title.*/title    Install Zentrix/' "$f"
-
-    elif grep -qi 'zentrix_guest=1' "$f"; then
+    if grep -qi 'zentrix_guest=1' "$f"; then
       sed -i -E 's/^title.*/title    Zentrix Guest Mode/' "$f"
 
     elif grep -qi 'accessibility=on' "$f"; then
       sed -i -E 's/^title.*/title    Zentrix Live with speech/' "$f"
 
-    elif grep -qi 'memtest' "$f"; then
+    elif grep -qi 'memtest\|fallback\|hardware\|uefi shell' "$f"; then
       sed -i -E 's/^title.*/title    Advanced options/' "$f"
 
     else
@@ -70,17 +41,16 @@ patch_systemd_boot_entries() {
     fi
   done
 }
-
-main() {
+     
   log "Aplicando branding de menu de arranque"
 
-  # BIOS / Syslinux
+  # Common syslinux locations in archiso profiles.
   patch_file_if_exists "$STAGING_PROFILE/syslinux/archiso_sys-linux.cfg"
   patch_file_if_exists "$STAGING_PROFILE/syslinux/archiso_head.cfg"
   patch_file_if_exists "$STAGING_PROFILE/syslinux/archiso_pxe-linux.cfg"
   patch_file_if_exists "$STAGING_PROFILE/syslinux/archiso_pxe.cfg"
 
-  # UEFI / systemd-boot
+  # Common systemd-boot location in archiso profiles.
   patch_systemd_boot_entries "$STAGING_PROFILE/efiboot/loader/entries"
 
   log "Branding de boot aplicado"

@@ -25,6 +25,8 @@ zentrix-security = "cli.security:main"
 zentrix-app = "cli.app:main"
 zentrix-snapshot = "cli.snapshot:main"
 zentrix-firewall = "cli.firewall:main"
+zentrix-parental = "cli.parental:main"
+zentrix-parental-remote = "cli.remote:main"
 
 [tool.setuptools]
 packages = [
@@ -34,6 +36,7 @@ packages = [
   "cli",
   "gui",
   "modules",
+  "core",
   "modules.updater",
   "modules.drivers",
   "modules.profiles",

@@ -21,6 +21,24 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("status")
     sub.add_parser("health")
 
+    parental = sub.add_parser("parental")
+    parental_sub = parental.add_subparsers(dest="parental_cmd", required=True)
+    parental_sub.add_parser("status")
+
+    parental_user = parental_sub.add_parser("user")
+    parental_user_sub = parental_user.add_subparsers(dest="user_cmd", required=True)
+    parental_user_sub.add_parser("list")
+
+    parental_policy = parental_sub.add_parser("policy")
+    parental_policy_sub = parental_policy.add_subparsers(dest="policy_cmd", required=True)
+    parental_policy_sub.add_parser("show")
+
+    parental_sub.add_parser("diagnostics")
+
+    parental_request = parental_sub.add_parser("request-time")
+    parental_request.add_argument("minutes", type=int)
+    parental_request.add_argument("--user", default="")
+
     prof = sub.add_parser("profile")
     prof_sub = prof.add_subparsers(dest="profile_cmd", required=True)
     prof_sub.add_parser("list")
@@ -52,6 +70,31 @@ def main() -> int:
     if args.cmd == "health":
         print(json.dumps(run(client.health()), indent=2))
         return 0
+
+    if args.cmd == "parental":
+        from core.parental import ParentalAgent
+
+        agent = ParentalAgent()
+
+        if args.parental_cmd == "status":
+            print(json.dumps(agent.status().__dict__, indent=2))
+            return 0
+
+        if args.parental_cmd == "user" and args.user_cmd == "list":
+            print("\n".join(agent.list_users()))
+            return 0
+
+        if args.parental_cmd == "policy" and args.policy_cmd == "show":
+            print(json.dumps(agent.show_policy(), indent=2))
+            return 0
+
+        if args.parental_cmd == "diagnostics":
+            print(json.dumps(agent.diagnostics(), indent=2))
+            return 0
+
+        if args.parental_cmd == "request-time":
+            print(json.dumps(agent.request_extra_time(args.minutes, user=args.user or None), indent=2))
+            return 0
 
     if args.cmd == "profile":
         if args.profile_cmd == "list":
