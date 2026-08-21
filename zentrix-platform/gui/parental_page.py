@@ -26,6 +26,10 @@ class ParentalPage(QtWidgets.QWidget):
         self.quick_actions = QtWidgets.QLabel("Waiting for policy...")
         self.quick_actions.setObjectName("mutedLabel")
 
+        self.weekly_summary = QtWidgets.QLabel("Uso semanal: sin datos todavía")
+        self.weekly_summary.setWordWrap(True)
+        self.weekly_summary.setObjectName("mutedLabel")
+
         self.policy = QtWidgets.QPlainTextEdit()
         self.policy.setReadOnly(True)
 
@@ -83,6 +87,18 @@ class ParentalPage(QtWidgets.QWidget):
         self.daily_limit_edit = QtWidgets.QSpinBox()
         self.daily_limit_edit.setRange(0, 1440)
         self.daily_limit_edit.setValue(180)
+
+        self.allowed_hours_edit = QtWidgets.QLineEdit()
+        self.allowed_hours_edit.setPlaceholderText("06:30-07:20, 17:45-21:30")
+        self.blocked_hours_edit = QtWidgets.QLineEdit()
+        self.blocked_hours_edit.setPlaceholderText("21:30-06:30, 14:00-16:00")
+        schedule_help = QtWidgets.QLabel(
+            "Horarios permitidos: solo se puede usar dentro de esos rangos. "
+            "Horarios bloqueados: siempre se bloquean, incluso si coinciden con un rango permitido."
+        )
+        schedule_help.setWordWrap(True)
+        schedule_help.setObjectName("mutedLabel")
+
         self.school_user_edit = QtWidgets.QLineEdit()
         self.school_user_edit.setPlaceholderText("kid1")
         self.apps_edit = QtWidgets.QPlainTextEdit()
@@ -100,18 +116,24 @@ class ParentalPage(QtWidgets.QWidget):
         controls_layout.addWidget(self.users_edit, 0, 1)
         controls_layout.addWidget(QtWidgets.QLabel("Daily limit"), 1, 0)
         controls_layout.addWidget(self.daily_limit_edit, 1, 1)
-        controls_layout.addWidget(QtWidgets.QLabel("School user"), 2, 0)
-        controls_layout.addWidget(self.school_user_edit, 2, 1)
-        controls_layout.addWidget(QtWidgets.QLabel("Apps"), 3, 0)
-        controls_layout.addWidget(self.apps_edit, 3, 1)
-        controls_layout.addWidget(QtWidgets.QLabel("Internet"), 4, 0)
-        controls_layout.addWidget(self.internet_edit, 4, 1)
-        controls_layout.addWidget(save_policy_button, 5, 0)
-        controls_layout.addWidget(lock_button, 5, 1)
+        controls_layout.addWidget(QtWidgets.QLabel("Allowed hours"), 2, 0)
+        controls_layout.addWidget(self.allowed_hours_edit, 2, 1)
+        controls_layout.addWidget(QtWidgets.QLabel("Blocked hours"), 3, 0)
+        controls_layout.addWidget(self.blocked_hours_edit, 3, 1)
+        controls_layout.addWidget(schedule_help, 4, 0, 1, 2)
+        controls_layout.addWidget(QtWidgets.QLabel("School user"), 5, 0)
+        controls_layout.addWidget(self.school_user_edit, 5, 1)
+        controls_layout.addWidget(QtWidgets.QLabel("Apps"), 6, 0)
+        controls_layout.addWidget(self.apps_edit, 6, 1)
+        controls_layout.addWidget(QtWidgets.QLabel("Internet"), 7, 0)
+        controls_layout.addWidget(self.internet_edit, 7, 1)
+        controls_layout.addWidget(save_policy_button, 8, 0)
+        controls_layout.addWidget(lock_button, 8, 1)
 
         layout.addWidget(title)
         layout.addWidget(self.summary)
         layout.addWidget(self.quick_actions)
+        layout.addWidget(self.weekly_summary)
         layout.addWidget(setup)
         layout.addWidget(controls)
         layout.addWidget(QtWidgets.QLabel("Policy"))
@@ -119,12 +141,53 @@ class ParentalPage(QtWidgets.QWidget):
         layout.addWidget(QtWidgets.QLabel("Diagnostics"))
         layout.addWidget(self.diagnostics)
 
+    @staticmethod
+    def _format_minutes(minutes: int) -> str:
+        minutes = max(0, int(minutes or 0))
+        hours, mins = divmod(minutes, 60)
+        if hours and mins:
+            return f"{hours} h {mins} min"
+        if hours:
+            return f"{hours} h"
+        return f"{mins} min"
+
+    @staticmethod
+    def _format_ranges(windows: list[dict]) -> str:
+        ranges = []
+        for window in windows or []:
+            start = str(window.get("start", "")).strip()
+            end = str(window.get("end", "")).strip()
+            if start and end:
+                ranges.append(f"{start}-{end}")
+        return ", ".join(ranges)
+
+    @staticmethod
+    def _parse_ranges(text: str) -> list[dict[str, str]]:
+        windows: list[dict[str, str]] = []
+        for raw_range in text.split(","):
+            value = raw_range.strip()
+            if not value:
+                continue
+            if "-" not in value:
+                raise ValueError(f"Rango inválido: {value}. Usa HH:MM-HH:MM")
+            start, end = [part.strip() for part in value.split("-", 1)]
+            for label, hhmm in (("inicio", start), ("fin", end)):
+                parts = hhmm.split(":")
+                if len(parts) != 2 or not all(part.isdigit() for part in parts):
+                    raise ValueError(f"Hora de {label} inválida: {hhmm}")
+                hour, minute = int(parts[0]), int(parts[1])
+                if not 0 <= hour <= 23 or not 0 <= minute <= 59:
+                    raise ValueError(f"Hora de {label} inválida: {hhmm}")
+            windows.append({"start": start, "end": end})
+        return windows
+
     def refresh(self) -> None:
         try:
             status = self.agent.status().__dict__
             policy = self.agent.show_policy()
             diagnostics = self.agent.diagnostics()
             cloud_config = self.remote.load_supabase_config()
+            state = self.agent.store.load_state()
         except Exception as exc:
             self.summary.setText(f"No se pudo cargar Parental Control: {exc}")
             return
@@ -139,8 +202,23 @@ class ParentalPage(QtWidgets.QWidget):
             f"Usado hoy: {status.get('daily_used_minutes', 0)} min | "
             f"Bloqueado: {'si' if status.get('locked') else 'no'}"
         )
+
+        weekly_parts = []
+        state_users = state.get("users", {}) if isinstance(state, dict) else {}
+        for user in policy.get("selected_users", []):
+            user_state = state_users.get(user, {})
+            weekly_parts.append(
+                f"{user}: {self._format_minutes(int(user_state.get('weekly_used_minutes', 0) or 0))}"
+            )
+        self.weekly_summary.setText(
+            "Tiempo acumulado esta semana: " + (" | ".join(weekly_parts) if weekly_parts else "sin usuarios controlados")
+        )
+
+        screen_time = policy.get("screen_time", {}) or {}
         self.users_edit.setText(",".join(policy.get("selected_users", [])))
-        self.daily_limit_edit.setValue(int(policy.get("screen_time", {}).get("daily_limit_minutes", 180) or 0))
+        self.daily_limit_edit.setValue(int(screen_time.get("daily_limit_minutes", 180) or 0))
+        self.allowed_hours_edit.setText(self._format_ranges(screen_time.get("allowed_hours", [])))
+        self.blocked_hours_edit.setText(self._format_ranges(screen_time.get("blocked_hours", [])))
         school_mode_users = policy.get("school_mode_users", [])
         self.school_user_edit.setText(school_mode_users[0] if school_mode_users else "")
         self.apps_edit.setPlainText(json.dumps(policy.get("apps", []), indent=2))
@@ -161,10 +239,18 @@ class ParentalPage(QtWidgets.QWidget):
 
     def _save_policy(self) -> None:
         try:
+            current_screen_time = dict(self.agent.show_policy().get("screen_time", {}) or {})
+            current_screen_time.update(
+                {
+                    "daily_limit_minutes": int(self.daily_limit_edit.value()),
+                    "allowed_hours": self._parse_ranges(self.allowed_hours_edit.text()),
+                    "blocked_hours": self._parse_ranges(self.blocked_hours_edit.text()),
+                }
+            )
             payload = {
                 "selected_users": [user.strip() for user in self.users_edit.text().split(",") if user.strip()],
                 "school_mode_users": [self.school_user_edit.text().strip()] if self.school_user_edit.text().strip() else [],
-                "screen_time": {"daily_limit_minutes": int(self.daily_limit_edit.value())},
+                "screen_time": current_screen_time,
                 "apps": json.loads(self.apps_edit.toPlainText() or "[]"),
                 "internet": json.loads(self.internet_edit.toPlainText() or "{}"),
             }
