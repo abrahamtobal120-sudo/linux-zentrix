@@ -3,7 +3,7 @@ from __future__ import annotations
 import subprocess
 import time
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Callable
 
 from core.parental import GUEST_USERS, ParentalAgent, is_admin_user
@@ -130,6 +130,43 @@ class ParentalRuntime:
                 return "schedule"
         return ""
 
+    @staticmethod
+    def _record_usage_history(user_state: dict[str, Any], today: str, minutes: int, now: datetime) -> None:
+        if minutes <= 0:
+            return
+        usage = user_state.setdefault("usage_by_date", {})
+        if not isinstance(usage, dict):
+            usage = {}
+            user_state["usage_by_date"] = usage
+        usage[today] = int(usage.get(today, 0) or 0) + minutes
+
+        cutoff = now.date() - timedelta(days=35)
+        for day_key in list(usage):
+            try:
+                day_value = datetime.fromisoformat(str(day_key)).date()
+            except ValueError:
+                del usage[day_key]
+                continue
+            if day_value < cutoff:
+                del usage[day_key]
+
+    @staticmethod
+    def _weekly_used_minutes(user_state: dict[str, Any], now: datetime) -> int:
+        usage = user_state.get("usage_by_date", {}) or {}
+        if not isinstance(usage, dict):
+            return 0
+        week_start = now.date() - timedelta(days=now.weekday())
+        week_end = week_start + timedelta(days=6)
+        total = 0
+        for day_key, minutes in usage.items():
+            try:
+                day_value = datetime.fromisoformat(str(day_key)).date()
+            except ValueError:
+                continue
+            if week_start <= day_value <= week_end:
+                total += max(0, int(minutes or 0))
+        return total
+
     def tick(self) -> dict[str, Any]:
         policy, state = self.agent.load()
         now = self.wall_clock()
@@ -162,11 +199,13 @@ class ParentalRuntime:
                 {
                     "remaining_minutes": self._limit_for_today(screen_time, now),
                     "daily_used_minutes": 0,
+                    "usage_by_date": {},
                     "locked": False,
                     "lock_reason": "",
                     "mode": "school" if user in policy.school_mode_users else "normal",
                 },
             )
+            user_state.setdefault("usage_by_date", {})
             meta = runtime.setdefault("users", {}).setdefault(
                 user,
                 {
@@ -212,6 +251,7 @@ class ParentalRuntime:
                         0,
                         int(user_state.get("remaining_minutes", 0)) - counted_minutes,
                     )
+                    self._record_usage_history(user_state, today, counted_minutes, now)
             elif not snapshot.countable:
                 # Idle, logged out and locked-session time must not accumulate.
                 meta["partial_seconds"] = 0.0
@@ -234,6 +274,8 @@ class ParentalRuntime:
                 user_state["locked"] = False
                 user_state["lock_reason"] = ""
 
+            weekly_used = self._weekly_used_minutes(user_state, now)
+            user_state["weekly_used_minutes"] = weekly_used
             results["users"][user] = {
                 "active": snapshot.active,
                 "idle": snapshot.idle,
@@ -241,6 +283,7 @@ class ParentalRuntime:
                 "counted_minutes": counted_minutes,
                 "remaining_minutes": int(user_state.get("remaining_minutes", 0)),
                 "daily_used_minutes": int(user_state.get("daily_used_minutes", 0)),
+                "weekly_used_minutes": weekly_used,
                 "locked": bool(user_state.get("locked", False)),
                 "lock_reason": str(user_state.get("lock_reason", "")),
             }
