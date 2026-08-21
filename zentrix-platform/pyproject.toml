@@ -36,7 +36,6 @@ packages = [
   "cli",
   "gui",
   "modules",
-  "core",
   "modules.updater",
   "modules.drivers",
   "modules.profiles",
@@ -50,3 +49,7 @@ packages = [
   "modules.privacy",
   "modules.firewall"
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
