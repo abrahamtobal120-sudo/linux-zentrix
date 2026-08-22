@@ -17,10 +17,11 @@ class SupabaseResponse:
 
 
 class SupabaseRestClient:
-    """Minimal PostgREST client using only Python stdlib.
+    """Minimal Supabase HTTP client using only Python stdlib.
 
-    The publishable/anon key is not treated as an administrative secret.
-    Authorization must still be enforced by Supabase Auth + RLS.
+    Publishable keys are sent on ``apikey``. User JWTs, when present, are sent
+    separately on ``Authorization`` so the new ``sb_publishable_`` format is
+    never incorrectly treated as a Bearer JWT.
     """
 
     def __init__(self, url: str, publishable_key: str, access_token: str = "", timeout: float = 8.0) -> None:
@@ -30,13 +31,13 @@ class SupabaseRestClient:
         self.timeout = timeout
 
     def _headers(self, extra: dict[str, str] | None = None) -> dict[str, str]:
-        auth = self.access_token or self.publishable_key
         headers = {
             "apikey": self.publishable_key,
-            "Authorization": f"Bearer {auth}",
             "Content-Type": "application/json",
             "Accept": "application/json",
         }
+        if self.access_token:
+            headers["Authorization"] = f"Bearer {self.access_token}"
         if extra:
             headers.update(extra)
         return headers
@@ -72,8 +73,6 @@ class SupabaseRestClient:
             return SupabaseResponse(False, 0, error=str(exc))
 
     def probe(self) -> SupabaseResponse:
-        # PostgREST root is enough to verify URL/key/network reachability without
-        # requiring any application table to exist yet.
         return self.request("GET", "/rest/v1/")
 
     def select(self, table: str, query: dict[str, str] | None = None) -> SupabaseResponse:
@@ -97,4 +96,18 @@ class SupabaseRestClient:
             query=filters,
             body=values,
             headers={"Prefer": "return=representation"},
+        )
+
+    def invoke_function(
+        self,
+        function_name: str,
+        body: dict[str, Any],
+        *,
+        headers: dict[str, str] | None = None,
+    ) -> SupabaseResponse:
+        return self.request(
+            "POST",
+            f"/functions/v1/{function_name}",
+            body=body,
+            headers=headers,
         )
