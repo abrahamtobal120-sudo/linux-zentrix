@@ -1,0 +1,136 @@
+name: Build Zentrix ISO
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zentrix-iso-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-iso:
+    name: Build x86_64 ISO
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Free runner disk space
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "Disk space before cleanup:"
+          df -h /
+
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo apt-get clean
+
+          echo "Disk space after cleanup:"
+          df -h /
+
+      - name: Validate repository scripts
+        shell: bash
+        run: |
+          set -euxo pipefail
+          bash -n build.sh
+          bash -n scripts/brand-boot-menu.sh
+          bash -n scripts/sync-live-assets.sh
+
+      - name: Build Zentrix inside Arch Linux
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          mkdir -p "$GITHUB_WORKSPACE/.ci/zentrix-localrepo"
+          mkdir -p "$GITHUB_WORKSPACE/out"
+
+          docker run --rm --privileged \
+            --name zentrix-archiso-builder \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            -w /workspace \
+            archlinux:latest \
+            bash -lc '
+              set -euxo pipefail
+
+              pacman -Syu --noconfirm --needed \
+                archiso \
+                base-devel \
+                git \
+                rsync \
+                sudo \
+                python \
+                python-pytest
+
+              # mkarchiso needs mount/loop capabilities. The container runs
+              # privileged, while the GitHub host remains isolated from the ISO.
+              modprobe loop 2>/dev/null || true
+
+              # build.sh intentionally requires a local Calamares repository.
+              # Build that package on the runner so the users computer is not
+              # involved in the ISO build at all.
+              useradd -m -s /bin/bash builder
+              printf "builder ALL=(ALL) NOPASSWD: ALL\n" > /etc/sudoers.d/zentrix-builder
+              chmod 0440 /etc/sudoers.d/zentrix-builder
+
+              rm -rf /tmp/calamares-aur
+              sudo -u builder git clone --depth=1 https://aur.archlinux.org/calamares.git /tmp/calamares-aur
+              sudo -u builder bash -lc "cd /tmp/calamares-aur && makepkg -s --noconfirm --needed"
+
+              rm -rf /workspace/.ci/zentrix-localrepo/*
+              cp /tmp/calamares-aur/calamares-*.pkg.tar.zst /workspace/.ci/zentrix-localrepo/
+
+              cd /workspace/.ci/zentrix-localrepo
+              repo-add zentrix-local.db.tar.gz calamares-*.pkg.tar.zst
+
+              test -e zentrix-local.db
+              ls -lh
+
+              cd /workspace
+
+              # Lightweight validation before spending time generating the ISO.
+              python -m compileall core daemon cli gui modules tests 2>/dev/null || \
+                python -m compileall zentrix-platform/core zentrix-platform/daemon zentrix-platform/cli zentrix-platform/gui zentrix-platform/modules zentrix-platform/tests
+
+              if [[ -d zentrix-platform/tests ]]; then
+                (cd zentrix-platform && pytest -q)
+              fi
+
+              chmod +x build.sh scripts/brand-boot-menu.sh scripts/sync-live-assets.sh
+              ZENTRIX_LOCAL_REPO=/workspace/.ci/zentrix-localrepo ./build.sh
+            '
+
+      - name: Verify generated ISO
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ISO="out/zentrix-by-abraham-tobal-1.0-x86_64.iso"
+          test -s "$ISO"
+          ls -lh "$ISO"
+          sha256sum "$ISO" | tee "$ISO.sha256"
+          file "$ISO"
+          df -h /
+
+      - name: Upload Zentrix ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: zentrix-by-abraham-tobal-${{ github.run_number }}
+          path: |
+            out/zentrix-by-abraham-tobal-1.0-x86_64.iso
+            out/zentrix-by-abraham-tobal-1.0-x86_64.iso.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
