@@ -59,6 +59,7 @@ patch_file_if_exists() {
           -e 's/Arch Linux install medium (%ARCH%, HTTP)/Zentrix Live/g' \
           -e 's/Arch Linux install medium (x86_64, UEFI)/Zentrix Live/g' \
           -e 's/Arch Linux install medium (x86_64)/Zentrix Live/g' \
+          -e 's/Arch Linux/Zentrix/g' \
           "$file"
         ;;
     esac
@@ -110,7 +111,9 @@ verify_visible_branding() {
     bad=1
   fi
 
-  if grep -RniE 'MENU (TITLE|LABEL).*Arch Linux|Boot Arch Linux|Arch Linux install medium' "$STAGING_PROFILE/syslinux" --include='*.cfg' 2>/dev/null; then
+  # Archiso cambia ocasionalmente los textos HELP/MENU. Verificamos cualquier
+  # referencia visible restante en los CFG de Syslinux, no solo MENU LABEL.
+  if grep -RniF 'Arch Linux' "$STAGING_PROFILE/syslinux" --include='*.cfg' 2>/dev/null; then
     echo "[brand-boot-menu][error] Quedó texto visible de Arch Linux en el menú BIOS" >&2
     bad=1
   fi
@@ -125,7 +128,7 @@ verify_visible_branding() {
 main() {
   log "Aplicando branding de menu de arranque"
 
-  # BIOS / Syslinux: fuerza el splash propio y elimina etiquetas visibles de Arch.
+  # BIOS / Syslinux: fuerza el splash propio y elimina etiquetas/textos visibles de Arch.
   install_syslinux_splash
   patch_all_syslinux_configs
 
