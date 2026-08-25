@@ -3,12 +3,17 @@ set -euo pipefail
 
 settings_file="/etc/calamares/settings.conf"
 
-if ! command -v calamares >/dev/null 2>&1; then
+show_error() {
+  local message="$1"
   if command -v kdialog >/dev/null 2>&1; then
-    kdialog --error "Calamares no esta instalado en esta imagen Live."
+    kdialog --error "$message"
   else
-    echo "Calamares no esta instalado en esta imagen Live." >&2
+    echo "$message" >&2
   fi
+}
+
+if ! command -v calamares >/dev/null 2>&1; then
+  show_error "Calamares no esta instalado en esta imagen Live."
   exit 1
 fi
 
@@ -18,9 +23,28 @@ if [[ ! -f "$settings_file" ]]; then
   fi
 fi
 
-# Start installer with polkit when needed; live rule allows this for user zentrix.
+# The live user has no usable password by design. Launch Calamares through a
+# narrowly-scoped NOPASSWD sudo rule instead of opening an authentication dialog.
 if [[ "${EUID}" -eq 0 ]]; then
   exec /usr/bin/calamares
 fi
 
-exec pkexec /usr/bin/calamares
+if [[ "$(id -un)" != "zentrix" ]]; then
+  show_error "Install Zentrix solo puede iniciarse automaticamente desde el usuario Live zentrix."
+  exit 1
+fi
+
+if ! command -v sudo >/dev/null 2>&1; then
+  show_error "No se encontro sudo en la imagen Live."
+  exit 1
+fi
+
+if ! sudo -n /usr/bin/true 2>/dev/null; then
+  # Test the exact installer command because the Live rule may grant only Calamares.
+  if ! sudo -n -l /usr/bin/calamares >/dev/null 2>&1; then
+    show_error "No se pudo obtener autorizacion Live para iniciar Calamares. Revisa /etc/sudoers.d/49-zentrix-calamares."
+    exit 1
+  fi
+fi
+
+exec sudo -n /usr/bin/calamares
