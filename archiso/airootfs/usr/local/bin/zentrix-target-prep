@@ -11,7 +11,9 @@ DisplayServer=x11
 Current=zentrix
 EOT
 
+# Remove Live-only privilege and launcher artifacts from the installed system.
 rm -f /etc/polkit-1/rules.d/49-zentrix-calamares.rules
+rm -f /etc/sudoers.d/49-zentrix-calamares
 rm -f /usr/share/applications/zentrix-install.desktop
 rm -f /usr/local/bin/zentrix-install
 rm -f /usr/local/bin/zentrix-live-start
