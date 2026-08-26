@@ -18,9 +18,9 @@ fun positionLogo() {
 
 positionLogo();
 
-title = "ZENTRIX";
+title = "ZENTRIX OS";
 subtitle = "by Abraham Tobal";
-statusText = "Starting...";
+statusText = "Iniciando...";
 
 fun makeLabel(txt, size, yOffset, r, g, b) {
   label = Label(txt);
