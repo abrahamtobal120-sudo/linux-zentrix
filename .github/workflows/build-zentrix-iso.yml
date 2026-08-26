@@ -49,6 +49,9 @@ jobs:
           bash -n build.sh
           bash -n scripts/brand-boot-menu.sh
           bash -n scripts/sync-live-assets.sh
+          bash -n archiso/airootfs/root/customize_airootfs.sh
+          bash -n archiso/airootfs/usr/local/bin/zentrix-install
+          bash -n archiso/airootfs/usr/local/bin/zentrix-target-prep
 
       - name: Build Zentrix inside Arch Linux
         shell: bash
@@ -77,6 +80,19 @@ jobs:
                 python-yaml
 
               modprobe loop 2>/dev/null || true
+
+              # Validate the Live installer privilege path before building.
+              test -f /workspace/archiso/airootfs/etc/sudoers.d/49-zentrix-calamares
+              install -m 0440 \
+                /workspace/archiso/airootfs/etc/sudoers.d/49-zentrix-calamares \
+                /tmp/49-zentrix-calamares
+              visudo -cf /tmp/49-zentrix-calamares
+              grep -qF "zentrix ALL=(root) NOPASSWD: /usr/bin/calamares" \
+                /workspace/archiso/airootfs/etc/sudoers.d/49-zentrix-calamares
+              grep -qF "com.github.calamares.calamares.pkexec.run" \
+                /workspace/archiso/airootfs/etc/polkit-1/rules.d/49-zentrix-calamares.rules
+              grep -qF "[/etc/sudoers.d/49-zentrix-calamares]=\"0:0:440\"" \
+                /workspace/archiso/profiledef.sh
 
               # Validate Zentrix Platform before spending time compiling Calamares.
               cd /workspace/zentrix-platform
