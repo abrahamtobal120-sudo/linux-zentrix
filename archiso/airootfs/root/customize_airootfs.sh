@@ -36,6 +36,16 @@ configure_live_user() {
 
   passwd -l "$user" >/dev/null 2>&1 || true
 
+  # Configure the Zentrix splash before the first Plasma session starts so the
+  # stock KDE/Breeze splash is never shown during Live startup.
+  cat > "/home/$user/.config/ksplashrc" <<'EOT'
+[KSplash]
+Engine=KSplashQML
+Theme=org.zentrix.desktop
+EOT
+  chown "$user:$user" "/home/$user/.config/ksplashrc"
+  chmod 0644 "/home/$user/.config/ksplashrc"
+
   cat > "/home/$user/.bash_profile" <<'EOT'
 if [[ -z "${DISPLAY:-}" && "$(tty)" == "/dev/tty1" ]]; then
   if command -v startplasma-x11 >/dev/null 2>&1; then
@@ -78,7 +88,7 @@ EOT
 configure_identity() {
   log "Aplicando identidad Zentrix"
   cat > /etc/issue <<'EOT'
-ZENTRIX by Abraham Tobal
+ZENTRIX OS by Abraham Tobal
 EOT
 }
 
