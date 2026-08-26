@@ -7,23 +7,23 @@ Rectangle {
     id: root
     width: 1920
     height: 1080
-    color: "#0a0d12"
+    color: "#070a0f"
 
-    property color panelColor: "#1a202b"
-    property color textColor: "#e5e7eb"
-    property color accentColor: "#1f8bff"
+    property color panelColor: "#111827"
+    property color textColor: "#f8fafc"
+    property color accentColor: "#60a5fa"
 
     Image {
         anchors.fill: parent
-        source: "file:///usr/share/wallpapers/zentrix-dark.png"
+        source: "file:///usr/share/wallpapers/zentrix-dark.svg"
         fillMode: Image.PreserveAspectCrop
         smooth: true
     }
 
     Rectangle {
         anchors.fill: parent
-        color: "#090c11"
-        opacity: 0.86
+        color: "#05070b"
+        opacity: 0.34
     }
 
     ColumnLayout {
@@ -43,10 +43,11 @@ Rectangle {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "Zentrix"
+            text: "ZENTRIX OS"
             color: textColor
             font.pixelSize: 34
             font.bold: true
+            font.letterSpacing: 3
         }
 
         Text {
@@ -62,7 +63,8 @@ Rectangle {
             width: Math.min(540, parent.width)
             radius: 14
             color: panelColor
-            border.color: "#2d3748"
+            opacity: 0.94
+            border.color: "#263244"
             border.width: 1
 
             ColumnLayout {
