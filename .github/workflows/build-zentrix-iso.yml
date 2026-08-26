@@ -91,7 +91,7 @@ jobs:
                 /workspace/archiso/airootfs/etc/sudoers.d/49-zentrix-calamares
               grep -qF "com.github.calamares.calamares.pkexec.run" \
                 /workspace/archiso/airootfs/etc/polkit-1/rules.d/49-zentrix-calamares.rules
-              grep -qF "[/etc/sudoers.d/49-zentrix-calamares]=\"0:0:440\"" \
+              grep -qF "[\"/etc/sudoers.d/49-zentrix-calamares\"]=\"0:0:440\"" \
                 /workspace/archiso/profiledef.sh
 
               # Validate Zentrix Platform before spending time compiling Calamares.
