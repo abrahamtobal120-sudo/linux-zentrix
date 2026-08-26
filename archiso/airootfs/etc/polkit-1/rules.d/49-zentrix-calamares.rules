@@ -1,10 +1,21 @@
-// Allow launching Calamares from the live user without password prompts.
+// Zentrix Live only: allow the temporary live user to start Calamares
+// without an authentication prompt. The rule is removed from the installed
+// system by zentrix-target-prep.
 polkit.addRule(function(action, subject) {
-  if (
+  if (subject.user != "zentrix" || !subject.active || !subject.local) {
+    return;
+  }
+
+  var program = action.lookup("program");
+  var genericPkexec =
     action.id == "org.freedesktop.policykit.exec" &&
-    action.lookup("program") == "/usr/bin/calamares" &&
-    subject.user == "zentrix"
-  ) {
+    program == "/usr/bin/calamares";
+
+  var calamaresAction =
+    action.id == "com.github.calamares.calamares.pkexec.run" ||
+    action.id == "io.calamares.calamares.pkexec.run";
+
+  if (genericPkexec || calamaresAction) {
     return polkit.Result.YES;
   }
 });
