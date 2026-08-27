@@ -98,6 +98,7 @@ configure_optional_local_repo() {
 
   [[ -d "$LOCAL_REPO_PATH" ]] || fail "ZENTRIX_LOCAL_REPO apunta a un directorio inexistente: $LOCAL_REPO_PATH"
   compgen -G "$LOCAL_REPO_PATH/$CALAMARES_PACKAGE_GLOB" >/dev/null || fail "No se encontro $LOCAL_REPO_PATH/$CALAMARES_PACKAGE_GLOB"
+  [[ -e "$LOCAL_REPO_PATH/zentrix-local.db" ]] || fail "Falta la base de datos del repo local: $LOCAL_REPO_PATH/zentrix-local.db"
 
   log "Agregando repo local opcional: $LOCAL_REPO_PATH"
   cat >> "$STAGING_PROFILE/pacman.conf" <<EOF
@@ -111,9 +112,8 @@ EOF
 package_exists() {
   local package_name="$1"
 
-  # Calamares viene del repositorio local de Zentrix
   if [[ "$package_name" == "calamares" && -n "$LOCAL_REPO_PATH" ]]; then
-    if compgen -G "$LOCAL_REPO_PATH/calamares-*.pkg.tar.zst" >/dev/null; then
+    if compgen -G "$LOCAL_REPO_PATH/calamares-*.pkg.tar.zst" >/dev/null && [[ -e "$LOCAL_REPO_PATH/zentrix-local.db" ]]; then
       return 0
     fi
   fi
@@ -200,6 +200,7 @@ stage_zentrix_platform() {
   install -d "$STAGING_PROFILE/airootfs/usr/lib/systemd/system"
   install -m 0644 "$ZENTRIX_PLATFORM_DIR/systemd/zentrix-core.service" "$STAGING_PROFILE/airootfs/usr/lib/systemd/system/"
   install -m 0644 "$ZENTRIX_PLATFORM_DIR/systemd/zentrix-core.path" "$STAGING_PROFILE/airootfs/usr/lib/systemd/system/"
+  install -m 0644 "$ZENTRIX_PLATFORM_DIR/systemd/zentrix-parental-agent.service" "$STAGING_PROFILE/airootfs/usr/lib/systemd/system/"
 
   install -d "$STAGING_PROFILE/airootfs/usr/lib/tmpfiles.d"
   install -m 0644 "$ZENTRIX_PLATFORM_DIR/systemd/tmpfiles.d/zentrix-core.conf" "$STAGING_PROFILE/airootfs/usr/lib/tmpfiles.d/"

@@ -29,6 +29,7 @@ openssh
 # Desktop stack
 xorg-server
 plasma-meta
+plasma-x11-session
 kde-applications-meta
 plasma-nm
 kde-gtk-config
