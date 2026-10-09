@@ -3,6 +3,8 @@ name: Build Zinarix ISO
 on:
   workflow_dispatch:
   push:
+    branches:
+      - zinarix-os
     tags:
       - "v*"
 
