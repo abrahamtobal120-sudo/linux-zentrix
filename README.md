@@ -1,16 +1,16 @@
-# Zentrix by Abraham Tobal
+# Zinarix by Abraham Tobal
 
-Proyecto para construir una distribucion Linux personalizada llamada **Zentrix by Abraham Tobal**, basada en Arch Linux, usando **Archiso**.
+Proyecto para construir una distribucion Linux personalizada llamada **Zinarix by Abraham Tobal**, basada en Arch Linux, usando **Archiso**.
 
 ## Estado del proyecto
 
 Este repositorio esta organizado por fases para permitir un desarrollo mantenible desde Visual Studio Code.
 
 Nueva arquitectura modular de siguiente etapa:
-- `zentrix-platform/` contiene Zentrix Core (daemon, API, CLI, modules, profiles, systemd, polkit).
-- Ver roadmap: `docs/ZENTRIX-PLATFORM-ROADMAP.md`.
-- Control Center base: `zentrix-platform/gui/control_center.py`.
-- Motor local modular y registro de módulos añadidos en `zentrix-platform/core/engine.py`.
+- `zinarix-platform/` contiene Zinarix Core (daemon, API, CLI, modules, profiles, systemd, polkit).
+- Ver roadmap: `docs/ZINARIX-PLATFORM-ROADMAP.md`.
+- Control Center base: `zinarix-platform/gui/control_center.py`.
+- Motor local modular y registro de módulos añadidos en `zinarix-platform/core/engine.py`.
 - Entradas de prueba de runtime disponibles para validar perfiles desde Python.
 
 - Fase 1: Estructura del repositorio + base funcional de Archiso (completada)
@@ -18,17 +18,17 @@ Nueva arquitectura modular de siguiente etapa:
 - Fase 3: ISO minima que arranque (preparada, pendiente validacion en host con archiso)
 - Fase 4: Integracion KDE Plasma (implementada, pendiente validacion en ISO real)
 - Fase 5: Integracion SDDM (implementada, pendiente validacion en ISO real)
-- Fase 6: Branding Zentrix (implementada en componentes activos, pendiente validacion en ISO real)
+- Fase 6: Branding Zinarix (implementada en componentes activos, pendiente validacion en ISO real)
 - Fase 7: Plymouth y GRUB (implementada en perfil, pendiente validacion en ISO real)
-- Fase 8: Aplicaciones Zentrix (implementada en perfil, pendiente validacion en ISO real)
+- Fase 8: Aplicaciones Zinarix (implementada en perfil, pendiente validacion en ISO real)
 - Fase 9: Integracion Calamares (implementada en perfil, pendiente validacion en ISO real)
 - Fase 10: Pruebas de instalacion (scripts listos, pendiente ejecucion completa en host con archiso)
 
 ## Identidad del sistema
 
-- Nombre completo: Zentrix by Abraham Tobal
-- Nombre corto: Zentrix
-- ID: zentrix
+- Nombre completo: Zinarix by Abraham Tobal
+- Nombre corto: Zinarix
+- ID: zinarix
 - Version inicial: 1.0
 - Arquitectura: x86_64
 - Base: Arch Linux
@@ -45,17 +45,17 @@ Instala dependencias minimas:
 sudo pacman -S --needed archiso git qemu-full rsync
 ```
 
-Para agregar Calamares de forma limpia en Arch, lo recomendable es usar un repo local con el paquete ya construido y apuntar el build a ese repo con `ZENTRIX_LOCAL_REPO`.
+Para agregar Calamares de forma limpia en Arch, lo recomendable es usar un repo local con el paquete ya construido y apuntar el build a ese repo con `ZINARIX_LOCAL_REPO`.
 
 Ejemplo:
 
 ```bash
-mkdir -p ~/zentrix-localrepo
+mkdir -p ~/zinarix-localrepo
 # Copia aqui calamares-*.pkg.tar.zst y sus dependencias no oficiales si hacen falta
-repo-add ~/zentrix-localrepo/zentrix-local.db.tar.gz ~/zentrix-localrepo/*.pkg.tar.zst
+repo-add ~/zinarix-localrepo/zinarix-local.db.tar.gz ~/zinarix-localrepo/*.pkg.tar.zst
 
-cd zentrix-os
-ZENTRIX_LOCAL_REPO=~/zentrix-localrepo ./build.sh
+cd zinarix-os
+ZINARIX_LOCAL_REPO=~/zinarix-localrepo ./build.sh
 ```
 
 Si no tienes el paquete aun, primero debes construir `calamares` para Arch o exportarlo desde una fuente compatible hacia ese repo local.
@@ -63,7 +63,7 @@ Si no tienes el paquete aun, primero debes construir `calamares` para Arch o exp
 ## Estructura principal
 
 ```text
-zentrix-os/
+zinarix-os/
 ├── README.md
 ├── build.sh
 ├── clean.sh
@@ -84,7 +84,7 @@ Clonar y abrir en VS Code:
 
 ```bash
 git clone REPOSITORIO
-cd zentrix-os
+cd zinarix-os
 code .
 ```
 
@@ -97,7 +97,7 @@ Construir ISO:
 Salida esperada:
 
 ```text
-out/zentrix-by-abraham-tobal-1.0-x86_64.iso
+out/zinarix-by-abraham-tobal-1.0-x86_64.iso
 ```
 
 Limpiar artefactos:
@@ -130,10 +130,10 @@ Sincronizar logos y wallpapers dentro del perfil staged de build:
 ./scripts/sync-live-assets.sh "$(pwd)" ./.build/profile
 ```
 
-Probar la plataforma Zentrix hoy mismo sin instalar daemon del sistema:
+Probar la plataforma Zinarix hoy mismo sin instalar daemon del sistema:
 
 ```bash
-cd zentrix-platform
+cd zinarix-platform
 python3 cli/main.py --local status
 python3 cli/main.py --local profile list
 python3 cli/main.py --local profile apply performance --dry-run
@@ -143,7 +143,7 @@ python3 gui/control_center.py --local
 Si quieres usar la GUI o el daemon completo en desarrollo, instala antes las dependencias Python de la plataforma:
 
 ```bash
-cd zentrix-platform
+cd zinarix-platform
 python3 -m pip install -e .
 ```
 
@@ -152,7 +152,7 @@ python3 -m pip install -e .
 1. Verifica sistema compatible y dependencias.
 2. Copia el perfil base `releng` desde Archiso a un directorio temporal (`.build/profile`).
 3. Aplica los overrides de `archiso/`.
-4. Fusiona paquetes base + paquetes propios definidos en `packages/zentrix-extra.x86_64`.
+4. Fusiona paquetes base + paquetes propios definidos en `packages/zinarix-extra.x86_64`.
 5. Ejecuta `mkarchiso` para generar la ISO final.
 6. Copia/normaliza la ultima ISO al nombre objetivo del proyecto.
 
@@ -162,11 +162,11 @@ Este enfoque evita romper componentes criticos de arranque y mantiene una base e
 
 - Identidad de sistema en `os-release` para el entorno Live.
 - Script `customize_airootfs.sh` para personalizacion durante build.
-- Usuario live temporal `zentrix` (sin contrasena hardcodeada).
+- Usuario live temporal `zinarix` (sin contrasena hardcodeada).
 - Servicios habilitados de forma condicional si existen: NetworkManager y bluetooth.
 - Autologin en TTY1 para el usuario live.
-- Acceso directo de escritorio: Install Zentrix.
-- Entradas de menu iniciales: Zentrix Welcome, Zentrix System Info, Zentrix Update.
+- Acceso directo de escritorio: Install Zinarix.
+- Entradas de menu iniciales: Zinarix Welcome, Zinarix System Info, Zinarix Update.
 
 ## Avance Fase 3
 
@@ -178,55 +178,55 @@ Este enfoque evita romper componentes criticos de arranque y mantiene una base e
 
 - Inicio automatico de KDE Plasma desde login live en tty1.
 - Tema oscuro por defecto y ajustes visuales base de escritorio.
-- Konsole con perfil "Zentrix Terminal".
+- Konsole con perfil "Zinarix Terminal".
 - Script de primer inicio para aplicar wallpaper y look-and-feel.
 - Sincronizacion automatica de logos y wallpapers al perfil staged durante el build.
 
 ## Avance Fase 5
 
-- Configuracion live de SDDM en /etc/sddm.conf.d/zentrix-live.conf.
-- Autologin del usuario temporal zentrix en Plasma.
+- Configuracion live de SDDM en /etc/sddm.conf.d/zinarix-live.conf.
+- Autologin del usuario temporal zinarix en Plasma.
 - Habilitacion condicional de sddm.service en customize_airootfs.
 - Deshabilitacion condicional de getty@tty1 para evitar conflicto con el display manager.
 
 ## Experiencia Live facil de instalar
 
-- Al iniciar la sesion Live, aparece un dialogo simple con dos opciones: Try Zentrix o Install Zentrix.
-- Si se elige Install Zentrix, se abre Calamares directamente.
-- El escritorio mantiene acceso directo grande Install Zentrix.
-- Existe regla polkit solo para el usuario live zentrix para evitar friccion en el arranque del instalador.
+- Al iniciar la sesion Live, aparece un dialogo simple con dos opciones: Try Zinarix o Install Zinarix.
+- Si se elige Install Zinarix, se abre Calamares directamente.
+- El escritorio mantiene acceso directo grande Install Zinarix.
+- Existe regla polkit solo para el usuario live zinarix para evitar friccion en el arranque del instalador.
 
 ## Avance Fase 6
 
-- Tema SDDM propio "zentrix" aplicado por defecto en Live.
+- Tema SDDM propio "zinarix" aplicado por defecto en Live.
 - Pantalla de login oscura con logo oficial, reloj y controles de energia.
-- Identidad visible: "Zentrix" y "by Abraham Tobal" en login.
+- Identidad visible: "Zinarix" y "by Abraham Tobal" en login.
 
 ## Avance Fase 7
 
-- Tema Plymouth propio con estilo oscuro y mensaje de inicio Zentrix.
+- Tema Plymouth propio con estilo oscuro y mensaje de inicio Zinarix.
 - Base de tema GRUB con identidad visual y timeout razonable.
 - Script de soporte para aplicar tema GRUB en sistemas donde corresponda.
 - Build sincroniza assets de boot (logos y fondo) automaticamente.
 
 ## Avance Fase 8
 
-- Zentrix Welcome en GUI real con Python + PySide6.
-- Boton principal "Install Zentrix" dentro de Welcome.
-- zentrix-update con validaciones y elevacion segura.
-- zentrix-info con modo `--fastfetch` y conteo de paquetes.
+- Zinarix Welcome en GUI real con Python + PySide6.
+- Boton principal "Install Zinarix" dentro de Welcome.
+- zinarix-update con validaciones y elevacion segura.
+- zinarix-info con modo `--fastfetch` y conteo de paquetes.
 - Lanzadores de menu propios para Welcome, System Info y Update.
 
 ## Avance Fase 9
 
-- Calamares configurado con branding `zentrix` y nombre de producto propio.
+- Calamares configurado con branding `zinarix` y nombre de producto propio.
 - Configuracion base de secuencia de instalacion para flujo simple.
 - Recursos visuales de branding para instalador (logo + tema oscuro).
-- Lanzador `zentrix-install` reforzado con validaciones.
+- Lanzador `zinarix-install` reforzado con validaciones.
 
 ## Avance Fase 10
 
-- `build.sh` prepara nombre final esperado: `out/zentrix-by-abraham-tobal-1.0-x86_64.iso`.
+- `build.sh` prepara nombre final esperado: `out/zinarix-by-abraham-tobal-1.0-x86_64.iso`.
 - `test-qemu.sh` incluye modo `--install` con disco virtual para prueba de Calamares.
 - Checklist completo de validacion en `docs/PHASE10.md`.
 

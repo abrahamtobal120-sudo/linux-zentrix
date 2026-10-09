@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+marker_dir="${XDG_CONFIG_HOME:-$HOME/.config}/zinarix"
+marker_file="$marker_dir/first-setup-complete"
+
+mkdir -p "$marker_dir"
+
+if [[ -f "$marker_file" ]]; then
+  exit 0
+fi
+
+if ! command -v kdialog >/dev/null 2>&1; then
+  exit 0
+fi
+
+choice="$({
+  printf '%s\n' dev 'Desarrollo' off
+  printf '%s\n' security 'Ciberseguridad' off
+  printf '%s\n' gaming 'Gaming' off
+  printf '%s\n' creator 'Creacion de contenido' off
+  printf '%s\n' school 'Escuela' off
+  printf '%s\n' normal 'Uso general' on
+  printf '%s\n' custom 'Personalizado' off
+} | xargs kdialog --title 'Zinarix First Setup' --radiolist 'Como vas a usar Zinarix?' )"
+
+if [[ -z "$choice" ]]; then
+  exit 0
+fi
+
+if [[ "$choice" != "custom" ]]; then
+  if ! /usr/local/bin/zinarixctl profile apply "$choice" >/tmp/zinarix-first-setup.log 2>&1; then
+    kdialog --error "No se pudo aplicar el perfil inicial.\n\nRevisa /tmp/zinarix-first-setup.log"
+    exit 1
+  fi
+fi
+
+: > "$marker_file"
+
+if [[ "$choice" == "custom" ]]; then
+  kdialog --msgbox 'Zinarix quedo en modo Personalizado. Puedes ajustar perfiles y modulos desde Zinarix Control Center.'
+else
+  kdialog --msgbox "Perfil inicial aplicado: $choice"
+fi

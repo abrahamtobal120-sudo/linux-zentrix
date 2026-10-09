@@ -1,3 +1,3 @@
 # GRUB assets
 
-Fondos, logo y recursos visuales para tema GRUB de Zentrix.
+Fondos, logo y recursos visuales para tema GRUB de Zinarix.

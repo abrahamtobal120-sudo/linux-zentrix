@@ -1,0 +1,37 @@
+pkgname=zinarix-platform
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Zinarix Core service platform"
+arch=('x86_64')
+url="https://zinarix.local"
+license=('MIT')
+depends=('python' 'python-pyyaml' 'python-dbus-next' 'polkit' 'systemd')
+source=()
+sha256sums=()
+
+package() {
+  install -d "$pkgdir/usr/share/zinarix-platform"
+  cp -r "$srcdir"/* "$pkgdir/usr/share/zinarix-platform/"
+
+  install -d "$pkgdir/usr/lib/systemd/system"
+  install -m 644 "$srcdir/systemd/zinarix-core.service" "$pkgdir/usr/lib/systemd/system/"
+  install -m 644 "$srcdir/systemd/zinarix-core.path" "$pkgdir/usr/lib/systemd/system/"
+
+  install -d "$pkgdir/usr/share/polkit-1/actions"
+  install -m 644 "$srcdir/polkit/org.zinarix.core.policy" "$pkgdir/usr/share/polkit-1/actions/"
+
+  install -d "$pkgdir/usr/share/applications"
+  install -m 644 "$srcdir/packaging/applications/zinarix-control-center.desktop" "$pkgdir/usr/share/applications/"
+
+  install -d "$pkgdir/usr/share/dbus-1/system-services"
+  install -m 644 "$srcdir/packaging/dbus-1/system-services/org.zinarix.Core.service" "$pkgdir/usr/share/dbus-1/system-services/"
+
+  install -d "$pkgdir/etc/dbus-1/system.d"
+  install -m 644 "$srcdir/packaging/dbus-1/system.d/org.zinarix.Core.conf" "$pkgdir/etc/dbus-1/system.d/"
+
+  install -d "$pkgdir/usr/lib/tmpfiles.d"
+  install -m 644 "$srcdir/systemd/tmpfiles.d/zinarix-core.conf" "$pkgdir/usr/lib/tmpfiles.d/"
+
+  install -d "$pkgdir/etc/zinarix"
+  install -m 644 "$srcdir/packaging/etc/zinarix/zinarix.yaml" "$pkgdir/etc/zinarix/"
+}

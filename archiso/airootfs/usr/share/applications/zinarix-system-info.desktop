@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zinarix System Info
+Comment=Show system information for Zinarix
+Exec=konsole -e zinarix-info --fastfetch
+Icon=computer
+Terminal=false
+Categories=System;Utility;
+StartupNotify=true

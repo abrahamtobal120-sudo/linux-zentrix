@@ -1,3 +1,0 @@
-# Zentrix Live only: allow the password-locked live user to start the installer.
-# This file is removed from the installed target by zentrix-target-prep.
-zentrix ALL=(root) NOPASSWD: /usr/bin/calamares

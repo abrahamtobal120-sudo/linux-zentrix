@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+install -d -m 0755 /etc/sddm.conf.d
+rm -f /etc/sddm.conf.d/zinarix-live.conf
+cat > /etc/sddm.conf.d/zinarix.conf <<'EOT'
+[General]
+DisplayServer=x11
+
+[Theme]
+Current=zinarix
+EOT
+
+# Remove Live-only privilege and launcher artifacts from the installed system.
+rm -f /etc/polkit-1/rules.d/49-zinarix-calamares.rules
+rm -f /etc/sudoers.d/49-zinarix-calamares
+rm -f /usr/share/applications/zinarix-install.desktop
+rm -f /usr/local/bin/zinarix-install
+rm -f /usr/local/bin/zinarix-live-start
+rm -f /home/zinarix/Desktop/Install\ Zinarix.desktop
+rm -f /home/zinarix/.config/autostart/zinarix-live-start.desktop
+rm -f /home/zinarix/.bash_profile
+
+if id -u zinarix >/dev/null 2>&1; then
+  userdel -r zinarix || true
+fi

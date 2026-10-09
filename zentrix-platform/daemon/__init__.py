@@ -1,1 +1,0 @@
-"""Zentrix daemon package."""

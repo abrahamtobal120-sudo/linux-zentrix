@@ -1,0 +1,1 @@
+"""Zinarix CLI commands."""

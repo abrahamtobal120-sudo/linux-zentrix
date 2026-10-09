@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "--cli" ]]; then
+	cat <<'BANNER'
+╭────────────────────────────────────╮
+│     ZINARIX by Abraham Tobal       │
+╰────────────────────────────────────╯
+
+Welcome to Zinarix.
+BANNER
+
+	echo
+	echo "Primeros pasos"
+	echo "- Conectarse a internet"
+	echo "- Actualizar Zinarix"
+	echo "- Instalar aplicaciones"
+	echo "- Configurar apariencia"
+	echo "- Informacion del sistema"
+	exit 0
+fi
+
+if command -v python3 >/dev/null 2>&1 && [[ -f /usr/local/lib/zinarix/zinarix_welcome.py ]]; then
+	exec python3 /usr/local/lib/zinarix/zinarix_welcome.py
+fi
+
+exec "$0" --cli

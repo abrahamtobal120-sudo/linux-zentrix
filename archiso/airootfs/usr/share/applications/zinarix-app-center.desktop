@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zinarix App Center
+Comment=Open the Zinarix application tools
+Exec=zinarix-app-center
+Icon=preferences-system
+Terminal=false
+Categories=System;
+StartupNotify=true

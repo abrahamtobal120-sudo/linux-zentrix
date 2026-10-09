@@ -24,7 +24,7 @@ disable_if_present() {
 }
 
 configure_live_user() {
-  local user="zentrix"
+  local user="zinarix"
 
   if ! id -u "$user" >/dev/null 2>&1; then
     log "Creando usuario live: $user"
@@ -37,12 +37,12 @@ configure_live_user() {
   # Do not hardcode passwords; live login is handled by SDDM autologin.
   passwd -l "$user" >/dev/null 2>&1 || true
 
-  # Configure the Zentrix splash before the first Plasma session starts so the
+  # Configure the Zinarix splash before the first Plasma session starts so the
   # stock KDE/Breeze splash is never shown during Live startup.
   cat > "/home/$user/.config/ksplashrc" <<'EOT'
 [KSplash]
 Engine=KSplashQML
-Theme=org.zentrix.desktop
+Theme=org.zinarix.desktop
 EOT
   chown "$user:$user" "/home/$user/.config/ksplashrc"
   chmod 0644 "/home/$user/.config/ksplashrc"
@@ -59,38 +59,38 @@ fi
 EOT
   chown "$user:$user" "/home/$user/.bash_profile"
 
-  cat > "/home/$user/.config/autostart/zentrix-live-start.desktop" <<'EOT'
+  cat > "/home/$user/.config/autostart/zinarix-live-start.desktop" <<'EOT'
 [Desktop Entry]
 Type=Application
-Name=Zentrix Live Start
-Comment=Choose between trying and installing Zentrix
-Exec=/usr/local/bin/zentrix-live-start
+Name=Zinarix Live Start
+Comment=Choose between trying and installing Zinarix
+Exec=/usr/local/bin/zinarix-live-start
 OnlyShowIn=KDE;
 X-KDE-autostart-phase=2
 X-KDE-StartupNotify=false
 NoDisplay=true
 EOT
-  chown "$user:$user" "/home/$user/.config/autostart/zentrix-live-start.desktop"
+  chown "$user:$user" "/home/$user/.config/autostart/zinarix-live-start.desktop"
 
-  cat > "/home/$user/Desktop/Install Zentrix.desktop" <<'EOT'
+  cat > "/home/$user/Desktop/Install Zinarix.desktop" <<'EOT'
 [Desktop Entry]
 Type=Application
-Name=Install Zentrix
-Comment=Install Zentrix by Abraham Tobal
-Exec=zentrix-install
+Name=Install Zinarix
+Comment=Install Zinarix by Abraham Tobal
+Exec=zinarix-install
 Icon=drive-harddisk
 Terminal=false
 Categories=System;
 StartupNotify=true
 EOT
-  chown "$user:$user" "/home/$user/Desktop/Install Zentrix.desktop"
-  chmod 0755 "/home/$user/Desktop/Install Zentrix.desktop"
+  chown "$user:$user" "/home/$user/Desktop/Install Zinarix.desktop"
+  chmod 0755 "/home/$user/Desktop/Install Zinarix.desktop"
 }
 
 configure_identity() {
-  log "Aplicando identidad Zentrix"
+  log "Aplicando identidad Zinarix"
   cat > /etc/issue <<'EOT'
-ZENTRIX OS by Abraham Tobal
+ZINARIX OS by Abraham Tobal
 EOT
 }
 
@@ -98,16 +98,16 @@ configure_sddm() {
   log "Configurando SDDM para sesion live"
 
   install -d -m 0755 /etc/sddm.conf.d
-  cat > /etc/sddm.conf.d/zentrix-live.conf <<'EOT'
+  cat > /etc/sddm.conf.d/zinarix-live.conf <<'EOT'
 [Autologin]
-User=zentrix
+User=zinarix
 Session=plasma.desktop
 
 [General]
 DisplayServer=x11
 
 [Theme]
-Current=zentrix
+Current=zinarix
 EOT
 
   enable_if_present "sddm.service"
@@ -119,7 +119,7 @@ EOT
 configure_plymouth() {
   log "Configurando Plymouth"
   if command -v plymouth-set-default-theme >/dev/null 2>&1; then
-    plymouth-set-default-theme -R zentrix || true
+    plymouth-set-default-theme -R zinarix || true
   else
     log "plymouth-set-default-theme no disponible, se omite"
   fi
@@ -132,8 +132,8 @@ main() {
   # Enable only essential services if corresponding packages are in the image.
   enable_if_present "NetworkManager.service"
   enable_if_present "bluetooth.service"
-  enable_if_present "zentrix-core.service"
-  enable_if_present "zentrix-core.path"
+  enable_if_present "zinarix-core.service"
+  enable_if_present "zinarix-core.path"
   configure_sddm
   configure_plymouth
 

@@ -1,11 +1,11 @@
-# ~/.bashrc for Zentrix live user
+# ~/.bashrc for Zinarix live user
 
-if [[ -n "${PS1:-}" ]] && command -v zentrix-welcome >/dev/null 2>&1; then
+if [[ -n "${PS1:-}" ]] && command -v zinarix-welcome >/dev/null 2>&1; then
   # Optional welcome banner in interactive terminals.
-  if [[ "${ZENTRIX_WELCOME_DISABLED:-0}" != "1" ]]; then
-    marker="/tmp/zentrix-welcome-shown-${UID}"
-    if [[ "${ZENTRIX_WELCOME_ALWAYS:-0}" == "1" || ! -f "$marker" ]]; then
-      zentrix-welcome
+  if [[ "${ZINARIX_WELCOME_DISABLED:-0}" != "1" ]]; then
+    marker="/tmp/zinarix-welcome-shown-${UID}"
+    if [[ "${ZINARIX_WELCOME_ALWAYS:-0}" == "1" || ! -f "$marker" ]]; then
+      zinarix-welcome
       : > "$marker"
     fi
   fi

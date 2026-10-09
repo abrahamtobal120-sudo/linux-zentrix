@@ -1,0 +1,19 @@
+# Zinarix Core Configuration
+
+Default file path:
+
+- /etc/zinarix/zinarix.yaml
+
+Example:
+
+```yaml
+name: Zinarix
+version: "1.0"
+telemetry_enabled: false
+log_file: /var/log/zinarix/core.log
+state_file: /var/lib/zinarix/state.json
+profile_dir: /usr/share/zinarix-platform/profiles
+module_allowlist: []
+```
+
+Telemetry is OFF by default.

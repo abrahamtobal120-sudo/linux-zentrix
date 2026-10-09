@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.zinarix.Core
+Exec=/usr/bin/systemctl start zinarix-core.service
+User=root

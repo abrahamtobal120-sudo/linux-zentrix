@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zinarix Welcome
+Comment=Welcome, setup, and first steps for Zinarix
+Exec=zinarix-welcome
+Icon=help-about
+Terminal=false
+Categories=System;Settings;Utility;
+StartupNotify=true

@@ -22,3 +22,4 @@ node_modules/
 
 # Local logs
 *.log
+.d/

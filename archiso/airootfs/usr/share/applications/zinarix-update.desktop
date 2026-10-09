@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zinarix Update
+Comment=Update Zinarix safely with pacman
+Exec=konsole -e zinarix-update
+Icon=system-software-update
+Terminal=false
+Categories=Settings;System;
+StartupNotify=true

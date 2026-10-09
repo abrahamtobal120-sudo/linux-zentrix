@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zinarix Recovery
+Comment=Open the Zinarix recovery tools
+Exec=zinarix-recovery
+Icon=preferences-system
+Terminal=false
+Categories=System;
+StartupNotify=true

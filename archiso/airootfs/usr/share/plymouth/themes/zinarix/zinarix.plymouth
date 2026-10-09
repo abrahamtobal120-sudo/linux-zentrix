@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Zinarix
+Description=Zinarix boot theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/zinarix
+ScriptFile=/usr/share/plymouth/themes/zinarix/zinarix.script

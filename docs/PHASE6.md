@@ -1,20 +1,20 @@
-# Fase 6 - Branding Zentrix Global
+# Fase 6 - Branding Zinarix Global
 
 Objetivo: reforzar identidad visual propia en componentes visibles del sistema ya activos.
 
 ## Implementado
-- Tema SDDM personalizado Zentrix.
-- Logo oficial Zentrix en login.
+- Tema SDDM personalizado Zinarix.
+- Logo oficial Zinarix en login.
 - Fondo oscuro con estilo minimalista.
 - Formulario limpio con usuario, contrasena y selector de sesion.
 - Controles de energia: suspender, reiniciar y apagar.
 - Reloj visible en pantalla de login.
-- Etiquetas de marca: Zentrix / by Abraham Tobal.
+- Etiquetas de marca: Zinarix / by Abraham Tobal.
 
 ## Archivos clave
-- archiso/airootfs/usr/share/sddm/themes/zentrix/Main.qml
-- archiso/airootfs/usr/share/sddm/themes/zentrix/metadata.desktop
-- archiso/airootfs/usr/share/sddm/themes/zentrix/theme.conf
+- archiso/airootfs/usr/share/sddm/themes/zinarix/Main.qml
+- archiso/airootfs/usr/share/sddm/themes/zinarix/metadata.desktop
+- archiso/airootfs/usr/share/sddm/themes/zinarix/theme.conf
 - archiso/airootfs/root/customize_airootfs.sh
 
 ## Estado

@@ -1,4 +1,4 @@
-# Icons Zentrix
+# Icons Zinarix
 
 Directorio para tema de iconos propio.
 

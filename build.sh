@@ -3,7 +3,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARCHISO_DIR="$PROJECT_ROOT/archiso"
-EXTRA_PACKAGES_FILE="$PROJECT_ROOT/packages/zentrix-extra.x86_64"
+EXTRA_PACKAGES_FILE="$PROJECT_ROOT/packages/zinarix-extra.x86_64"
 STAGING_ROOT="$PROJECT_ROOT/.d"
 STAGING_PROFILE="$STAGING_ROOT/profile"
 WORK_DIR="$PROJECT_ROOT/work"
@@ -11,11 +11,11 @@ OUT_DIR="$PROJECT_ROOT/out"
 RESOLVED_EXTRA_PACKAGES_FILE="$STAGING_ROOT/packages-resolved.x86_64"
 BOOT_BRANDING_SCRIPT="$PROJECT_ROOT/scripts/brand-boot-menu.sh"
 ASSET_SYNC_SCRIPT="$PROJECT_ROOT/scripts/sync-live-assets.sh"
-ISO_FINAL_NAME="zentrix-by-abraham-tobal-1.0-x86_64.iso"
+ISO_FINAL_NAME="zinarix-by-abraham-tobal-1.0-x86_64.iso"
 BASE_PROFILE=""
-LOCAL_REPO_PATH="${ZENTRIX_LOCAL_REPO:-}"
+LOCAL_REPO_PATH="${ZINARIX_LOCAL_REPO:-}"
 CALAMARES_PACKAGE_GLOB="calamares-*.pkg.tar.zst"
-ZENTRIX_PLATFORM_DIR="$PROJECT_ROOT/zentrix-platform"
+ZINARIX_PLATFORM_DIR="$PROJECT_ROOT/zinarix-platform"
 
 log() {
   printf '[d] %s\n' "$*"
@@ -93,16 +93,16 @@ stage_profile() {
 
 configure_optional_local_repo() {
   if [[ -z "$LOCAL_REPO_PATH" ]]; then
-    fail "Define ZENTRIX_LOCAL_REPO con un repo local que contenga $CALAMARES_PACKAGE_GLOB para construir una ISO instalable."
+    fail "Define ZINARIX_LOCAL_REPO con un repo local que contenga $CALAMARES_PACKAGE_GLOB para construir una ISO instalable."
   fi
 
-  [[ -d "$LOCAL_REPO_PATH" ]] || fail "ZENTRIX_LOCAL_REPO apunta a un directorio inexistente: $LOCAL_REPO_PATH"
+  [[ -d "$LOCAL_REPO_PATH" ]] || fail "ZINARIX_LOCAL_REPO apunta a un directorio inexistente: $LOCAL_REPO_PATH"
   compgen -G "$LOCAL_REPO_PATH/$CALAMARES_PACKAGE_GLOB" >/dev/null || fail "No se encontro $LOCAL_REPO_PATH/$CALAMARES_PACKAGE_GLOB"
 
   log "Agregando repo local opcional: $LOCAL_REPO_PATH"
   cat >> "$STAGING_PROFILE/pacman.conf" <<EOF
 
-[zentrix-local]
+[zinarix-local]
 SigLevel = Optional TrustAll
 Server = file://$LOCAL_REPO_PATH
 EOF
@@ -111,7 +111,7 @@ EOF
 package_exists() {
   local package_name="$1"
 
-  # Calamares viene del repositorio local de Zentrix
+  # Calamares viene del repositorio local de Zinarix
   if [[ "$package_name" == "calamares" && -n "$LOCAL_REPO_PATH" ]]; then
     if compgen -G "$LOCAL_REPO_PATH/calamares-*.pkg.tar.zst" >/dev/null; then
       return 0
@@ -138,7 +138,7 @@ resolve_package_name() {
   fi
 
   if [[ "$package_name" == "calamares" ]]; then
-    fail "El paquete 'calamares' no esta disponible en los repos configurados. Verifica tu repo local en ZENTRIX_LOCAL_REPO."
+    fail "El paquete 'calamares' no esta disponible en los repos configurados. Verifica tu repo local en ZINARIX_LOCAL_REPO."
   fi
 
   fail "El paquete '$package_name' no existe en los repos configurados para Archiso."
@@ -163,7 +163,7 @@ resolve_extra_packages() {
 }
 
 merge_packages() {
-  log "Fusionando paquetes base + Zentrix..."
+  log "Fusionando paquetes base + Zinarix..."
   resolve_extra_packages
   awk '!seen[$0]++' \
     "$BASE_PROFILE/packages.x86_64" \
@@ -181,12 +181,12 @@ brand_boot_menu() {
   "$BOOT_BRANDING_SCRIPT" "$STAGING_PROFILE"
 }
 
-stage_zentrix_platform() {
-  [[ -d "$ZENTRIX_PLATFORM_DIR" ]] || fail "No existe el directorio de la plataforma: $ZENTRIX_PLATFORM_DIR"
+stage_zinarix_platform() {
+  [[ -d "$ZINARIX_PLATFORM_DIR" ]] || fail "No existe el directorio de la plataforma: $ZINARIX_PLATFORM_DIR"
 
-  log "Integrando Zentrix Platform en el rootfs instalable..."
+  log "Integrando Zinarix Platform en el rootfs instalable..."
 
-  install -d "$STAGING_PROFILE/airootfs/usr/share/zentrix-platform"
+  install -d "$STAGING_PROFILE/airootfs/usr/share/zinarix-platform"
   rsync -a --delete \
     --exclude '.git/' \
     --exclude '.pytest_cache/' \
@@ -194,30 +194,30 @@ stage_zentrix_platform() {
     --exclude '*.pyc' \
     --exclude '.venv/' \
     --exclude '.runtime/' \
-    "$ZENTRIX_PLATFORM_DIR/" \
-    "$STAGING_PROFILE/airootfs/usr/share/zentrix-platform/"
+    "$ZINARIX_PLATFORM_DIR/" \
+    "$STAGING_PROFILE/airootfs/usr/share/zinarix-platform/"
 
   install -d "$STAGING_PROFILE/airootfs/usr/lib/systemd/system"
-  install -m 0644 "$ZENTRIX_PLATFORM_DIR/systemd/zentrix-core.service" "$STAGING_PROFILE/airootfs/usr/lib/systemd/system/"
-  install -m 0644 "$ZENTRIX_PLATFORM_DIR/systemd/zentrix-core.path" "$STAGING_PROFILE/airootfs/usr/lib/systemd/system/"
+  install -m 0644 "$ZINARIX_PLATFORM_DIR/systemd/zinarix-core.service" "$STAGING_PROFILE/airootfs/usr/lib/systemd/system/"
+  install -m 0644 "$ZINARIX_PLATFORM_DIR/systemd/zinarix-core.path" "$STAGING_PROFILE/airootfs/usr/lib/systemd/system/"
 
   install -d "$STAGING_PROFILE/airootfs/usr/lib/tmpfiles.d"
-  install -m 0644 "$ZENTRIX_PLATFORM_DIR/systemd/tmpfiles.d/zentrix-core.conf" "$STAGING_PROFILE/airootfs/usr/lib/tmpfiles.d/"
+  install -m 0644 "$ZINARIX_PLATFORM_DIR/systemd/tmpfiles.d/zinarix-core.conf" "$STAGING_PROFILE/airootfs/usr/lib/tmpfiles.d/"
 
-  install -d "$STAGING_PROFILE/airootfs/etc/zentrix"
-  install -m 0644 "$ZENTRIX_PLATFORM_DIR/packaging/etc/zentrix/zentrix.yaml" "$STAGING_PROFILE/airootfs/etc/zentrix/"
+  install -d "$STAGING_PROFILE/airootfs/etc/zinarix"
+  install -m 0644 "$ZINARIX_PLATFORM_DIR/packaging/etc/zinarix/zinarix.yaml" "$STAGING_PROFILE/airootfs/etc/zinarix/"
 
   install -d "$STAGING_PROFILE/airootfs/usr/share/dbus-1/system-services"
-  install -m 0644 "$ZENTRIX_PLATFORM_DIR/packaging/dbus-1/system-services/org.zentrix.Core.service" "$STAGING_PROFILE/airootfs/usr/share/dbus-1/system-services/"
+  install -m 0644 "$ZINARIX_PLATFORM_DIR/packaging/dbus-1/system-services/org.zinarix.Core.service" "$STAGING_PROFILE/airootfs/usr/share/dbus-1/system-services/"
 
   install -d "$STAGING_PROFILE/airootfs/etc/dbus-1/system.d"
-  install -m 0644 "$ZENTRIX_PLATFORM_DIR/packaging/dbus-1/system.d/org.zentrix.Core.conf" "$STAGING_PROFILE/airootfs/etc/dbus-1/system.d/"
+  install -m 0644 "$ZINARIX_PLATFORM_DIR/packaging/dbus-1/system.d/org.zinarix.Core.conf" "$STAGING_PROFILE/airootfs/etc/dbus-1/system.d/"
 
   install -d "$STAGING_PROFILE/airootfs/usr/share/polkit-1/actions"
-  install -m 0644 "$ZENTRIX_PLATFORM_DIR/polkit/org.zentrix.core.policy" "$STAGING_PROFILE/airootfs/usr/share/polkit-1/actions/"
+  install -m 0644 "$ZINARIX_PLATFORM_DIR/polkit/org.zinarix.core.policy" "$STAGING_PROFILE/airootfs/usr/share/polkit-1/actions/"
 
   install -d "$STAGING_PROFILE/airootfs/usr/share/applications"
-  install -m 0644 "$ZENTRIX_PLATFORM_DIR/packaging/applications/zentrix-control-center.desktop" "$STAGING_PROFILE/airootfs/usr/share/applications/"
+  install -m 0644 "$ZINARIX_PLATFORM_DIR/packaging/applications/zinarix-control-center.desktop" "$STAGING_PROFILE/airootfs/usr/share/applications/"
 }
 
 run_mkarchiso() {
@@ -250,7 +250,7 @@ main() {
   stage_profile
   configure_optional_local_repo
   merge_packages
-  stage_zentrix_platform
+  stage_zinarix_platform
   sync_live_assets
   brand_boot_menu
   run_mkarchiso

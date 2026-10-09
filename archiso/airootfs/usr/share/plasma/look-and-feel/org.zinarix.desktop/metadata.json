@@ -1,0 +1,15 @@
+{
+  "KPlugin": {
+    "Id": "org.zinarix.desktop",
+    "Name": "Zinarix OS",
+    "Description": "Zinarix OS startup splash",
+    "Version": "1.0",
+    "License": "GPL-3.0-or-later",
+    "Authors": [
+      {
+        "Name": "Abraham Tobal"
+      }
+    ]
+  },
+  "KPackageStructure": "Plasma/LookAndFeel"
+}

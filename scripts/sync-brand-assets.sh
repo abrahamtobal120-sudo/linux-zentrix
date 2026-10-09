@@ -3,7 +3,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOGO_DIR="$PROJECT_ROOT/assets/logos"
-MASTER="$LOGO_DIR/zentrix-logo-master.png"
+MASTER="$LOGO_DIR/zinarix-logo-master.png"
 
 if [[ ! -f "$MASTER" ]]; then
   echo "[sync-brand-assets][error] No existe: $MASTER" >&2
@@ -11,12 +11,12 @@ if [[ ! -f "$MASTER" ]]; then
 fi
 
 targets=(
-  "zentrix-main-logo.png"
-  "zentrix-menu-logo.png"
-  "zentrix-sddm-logo.png"
-  "zentrix-plymouth-logo.png"
-  "zentrix-grub-logo.png"
-  "zentrix-fastfetch-logo.png"
+  "zinarix-main-logo.png"
+  "zinarix-menu-logo.png"
+  "zinarix-sddm-logo.png"
+  "zinarix-plymouth-logo.png"
+  "zinarix-grub-logo.png"
+  "zinarix-fastfetch-logo.png"
 )
 
 for target in "${targets[@]}"; do

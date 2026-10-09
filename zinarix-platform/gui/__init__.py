@@ -1,0 +1,1 @@
+"""Zinarix GUI applications."""

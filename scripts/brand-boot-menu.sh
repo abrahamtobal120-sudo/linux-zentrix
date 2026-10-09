@@ -26,15 +26,15 @@ patch_file_if_exists() {
     case "$file" in
       *.cfg)
         sed -i \
-          -e 's/^MENU TITLE .*/MENU TITLE ZENTRIX/' \
-          -e 's/Boot Arch Linux (x86_64)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (%ARCH%, BIOS) with \^speech/Zentrix Live with ^speech/g' \
-          -e 's/Arch Linux install medium (%ARCH%, BIOS)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (%ARCH%, NBD)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (%ARCH%, NFS)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (%ARCH%, HTTP)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (x86_64, UEFI)/Zentrix Live/g' \
-          -e 's/Arch Linux install medium (x86_64)/Zentrix Live/g' \
+          -e 's/^MENU TITLE .*/MENU TITLE ZINARIX/' \
+          -e 's/Boot Arch Linux (x86_64)/Zinarix Live/g' \
+          -e 's/Arch Linux install medium (%ARCH%, BIOS) with \^speech/Zinarix Live with ^speech/g' \
+          -e 's/Arch Linux install medium (%ARCH%, BIOS)/Zinarix Live/g' \
+          -e 's/Arch Linux install medium (%ARCH%, NBD)/Zinarix Live/g' \
+          -e 's/Arch Linux install medium (%ARCH%, NFS)/Zinarix Live/g' \
+          -e 's/Arch Linux install medium (%ARCH%, HTTP)/Zinarix Live/g' \
+          -e 's/Arch Linux install medium (x86_64, UEFI)/Zinarix Live/g' \
+          -e 's/Arch Linux install medium (x86_64)/Zinarix Live/g' \
           "$file"
         ;;
     esac
@@ -53,20 +53,20 @@ patch_systemd_boot_entries() {
 
     log "Ajustando entrada UEFI: $f"
 
-    if grep -qi 'zentrix_install=1' "$f"; then
-      sed -i -E 's/^title.*/title    Install Zentrix/' "$f"
+    if grep -qi 'zinarix_install=1' "$f"; then
+      sed -i -E 's/^title.*/title    Install Zinarix/' "$f"
 
-    elif grep -qi 'zentrix_guest=1' "$f"; then
-      sed -i -E 's/^title.*/title    Zentrix Guest Mode/' "$f"
+    elif grep -qi 'zinarix_guest=1' "$f"; then
+      sed -i -E 's/^title.*/title    Zinarix Guest Mode/' "$f"
 
     elif grep -qi 'accessibility=on' "$f"; then
-      sed -i -E 's/^title.*/title    Zentrix Live with speech/' "$f"
+      sed -i -E 's/^title.*/title    Zinarix Live with speech/' "$f"
 
     elif grep -qi 'memtest' "$f"; then
       sed -i -E 's/^title.*/title    Advanced options/' "$f"
 
     else
-      sed -i -E 's/^title.*/title    Zentrix Live/' "$f"
+      sed -i -E 's/^title.*/title    Zinarix Live/' "$f"
     fi
   done
 }

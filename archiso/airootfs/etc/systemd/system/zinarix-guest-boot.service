@@ -1,0 +1,12 @@
+[Unit]
+Description=Zinarix Guest Mode boot configuration
+Before=sddm.service
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/zinarix-guest-boot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical.target

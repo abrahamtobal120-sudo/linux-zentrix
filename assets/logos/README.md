@@ -1,21 +1,21 @@
-# Logos Zentrix
+# Logos Zinarix
 
 Logo oficial integrado desde archivo proporcionado por el autor del proyecto.
 
 ## Archivo maestro
-- `zentrix-logo-master.png`
+- `zinarix-logo-master.png`
 
 ## Variantes de uso
-- `zentrix-main-logo.png`
-- `zentrix-menu-logo.png`
-- `zentrix-sddm-logo.png`
-- `zentrix-plymouth-logo.png`
-- `zentrix-grub-logo.png`
-- `zentrix-fastfetch-logo.png`
+- `zinarix-main-logo.png`
+- `zinarix-menu-logo.png`
+- `zinarix-sddm-logo.png`
+- `zinarix-plymouth-logo.png`
+- `zinarix-grub-logo.png`
+- `zinarix-fastfetch-logo.png`
 
 ## Mantenimiento
-- Editar o reemplazar solo `zentrix-logo-master.png`.
+- Editar o reemplazar solo `zinarix-logo-master.png`.
 - Ejecutar `scripts/sync-brand-assets.sh` para actualizar todas las variantes.
 
 ## Licencia
-Este recurso fue proporcionado por Abraham Tobal para uso en Zentrix.
+Este recurso fue proporcionado por Abraham Tobal para uso en Zinarix.

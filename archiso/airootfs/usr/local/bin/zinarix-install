@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+settings_file="/etc/calamares/settings.conf"
+
+show_error() {
+  local message="$1"
+  if command -v kdialog >/dev/null 2>&1; then
+    kdialog --error "$message"
+  else
+    echo "$message" >&2
+  fi
+}
+
+if ! command -v calamares >/dev/null 2>&1; then
+  show_error "Calamares no esta instalado en esta imagen Live."
+  exit 1
+fi
+
+if [[ ! -f "$settings_file" ]]; then
+  if command -v kdialog >/dev/null 2>&1; then
+    kdialog --warningyesno "No se encontro $settings_file.\n\nCalamares puede abrir con configuracion por defecto.\n\nDeseas continuar?" || exit 1
+  fi
+fi
+
+# The live user has no usable password by design. Launch Calamares through a
+# narrowly-scoped NOPASSWD sudo rule instead of opening an authentication dialog.
+if [[ "${EUID}" -eq 0 ]]; then
+  exec /usr/bin/calamares
+fi
+
+if [[ "$(id -un)" != "zinarix" ]]; then
+  show_error "Install Zinarix solo puede iniciarse automaticamente desde el usuario Live zinarix."
+  exit 1
+fi
+
+if ! command -v sudo >/dev/null 2>&1; then
+  show_error "No se encontro sudo en la imagen Live."
+  exit 1
+fi
+
+if ! sudo -n /usr/bin/true 2>/dev/null; then
+  # Test the exact installer command because the Live rule may grant only Calamares.
+  if ! sudo -n -l /usr/bin/calamares >/dev/null 2>&1; then
+    show_error "No se pudo obtener autorizacion Live para iniciar Calamares. Revisa /etc/sudoers.d/49-zinarix-calamares."
+    exit 1
+  fi
+fi
+
+exec sudo -n /usr/bin/calamares

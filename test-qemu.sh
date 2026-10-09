@@ -4,7 +4,7 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUT_DIR="$PROJECT_ROOT/out"
 DISK_DIR="$PROJECT_ROOT/.build/qemu"
-DISK_PATH="$DISK_DIR/zentrix-test.qcow2"
+DISK_PATH="$DISK_DIR/zinarix-test.qcow2"
 DISK_SIZE_GB="64"
 MODE="live"
 BOOT_MODE="iso"

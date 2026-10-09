@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Install Zinarix
+Comment=Install Zinarix by Abraham Tobal
+Exec=zinarix-install
+Icon=drive-harddisk
+Terminal=false
+Categories=System;Settings;
+StartupNotify=true

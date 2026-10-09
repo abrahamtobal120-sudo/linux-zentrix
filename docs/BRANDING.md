@@ -1,15 +1,15 @@
-# Branding Zentrix
+# Branding Zinarix
 
 Este archivo define placeholders y recursos pendientes de identidad visual.
 
 ## Nombre oficial
-- Zentrix by Abraham Tobal
+- Zinarix by Abraham Tobal
 
 ## Directorios de assets
 - assets/logos/
 - assets/wallpapers/
 - assets/icons/
-- assets/plymouth/zentrix/
+- assets/plymouth/zinarix/
 - assets/grub/
 - assets/sddm/
 
@@ -17,11 +17,11 @@ Este archivo define placeholders y recursos pendientes de identidad visual.
 Mientras no existan disenos finales, se usan archivos de referencia y notas.
 
 ## Estado actual
-- Logo oficial Zentrix disponible en `assets/logos/zentrix-logo-master.png`.
+- Logo oficial Zinarix disponible en `assets/logos/zinarix-logo-master.png`.
 - Variantes de uso ya preparadas para menu, SDDM, Plymouth, GRUB y Fastfetch.
-- Tema SDDM Zentrix integrado en `archiso/airootfs/usr/share/sddm/themes/zentrix/`.
-- Tema Plymouth Zentrix integrado en `archiso/airootfs/usr/share/plymouth/themes/zentrix/`.
-- Base de tema GRUB Zentrix integrada en `archiso/airootfs/usr/share/grub/themes/zentrix/`.
+- Tema SDDM Zinarix integrado en `archiso/airootfs/usr/share/sddm/themes/zinarix/`.
+- Tema Plymouth Zinarix integrado en `archiso/airootfs/usr/share/plymouth/themes/zinarix/`.
+- Base de tema GRUB Zinarix integrada en `archiso/airootfs/usr/share/grub/themes/zinarix/`.
 
 ## Reglas
 - No usar logos de terceros sin autorizacion.

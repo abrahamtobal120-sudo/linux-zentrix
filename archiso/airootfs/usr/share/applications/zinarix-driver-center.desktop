@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zinarix Driver Center
+Comment=Open the Zinarix driver tools
+Exec=zinarix-driver-center
+Icon=preferences-system
+Terminal=false
+Categories=Settings;System;
+StartupNotify=true

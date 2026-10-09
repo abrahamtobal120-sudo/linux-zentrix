@@ -1,1 +1,0 @@
-"""Zentrix CLI commands."""

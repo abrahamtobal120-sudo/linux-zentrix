@@ -1,4 +1,4 @@
-# Roadmap Zentrix
+# Roadmap Zinarix
 
 ## Fase 1
 - Estructura completa del repositorio
@@ -21,7 +21,7 @@
  - Estado: implementada en perfil, pendiente validacion en ISO real
 
 ## Fase 6
-- Branding Zentrix global
+- Branding Zinarix global
  - Estado: implementada en componentes activos, pendiente validacion en ISO real
 
 ## Fase 7

@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch Zinarix config changes
+
+[Path]
+PathModified=/etc/zinarix/zinarix.yaml
+Unit=zinarix-core.service
+
+[Install]
+WantedBy=multi-user.target

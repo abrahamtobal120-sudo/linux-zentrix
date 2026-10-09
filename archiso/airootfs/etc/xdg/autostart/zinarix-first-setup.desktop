@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Zinarix First Setup
+Comment=Choose the initial Zinarix profile on the first login
+Exec=/usr/local/bin/zinarix-first-setup-launcher
+OnlyShowIn=KDE;
+X-KDE-autostart-phase=2
+NoDisplay=false
+Terminal=false
+Categories=Settings;System;

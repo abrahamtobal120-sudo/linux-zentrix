@@ -1,0 +1,158 @@
+name: Build Zinarix ISO
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zinarix-iso-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-iso:
+    name: Build x86_64 ISO
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Free runner disk space
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "Disk space before cleanup:"
+          df -h /
+
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo apt-get clean
+
+          echo "Disk space after cleanup:"
+          df -h /
+
+      - name: Validate repository scripts
+        shell: bash
+        run: |
+          set -euxo pipefail
+          bash -n build.sh
+          bash -n scripts/brand-boot-menu.sh
+          bash -n scripts/sync-live-assets.sh
+          bash -n archiso/airootfs/root/customize_airootfs.sh
+          bash -n archiso/airootfs/usr/local/bin/zinarix-install
+          bash -n archiso/airootfs/usr/local/bin/zinarix-target-prep
+
+      - name: Build Zinarix inside Arch Linux
+        shell: bash
+        run: |
+          set -euxo pipefail
+
+          mkdir -p "$GITHUB_WORKSPACE/.ci/zinarix-localrepo"
+          mkdir -p "$GITHUB_WORKSPACE/out"
+
+          docker run --rm --privileged \
+            --name zinarix-archiso-builder \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            -w /workspace \
+            archlinux:latest \
+            bash -lc '
+              set -euxo pipefail
+
+              pacman -Syu --noconfirm --needed \
+                archiso \
+                base-devel \
+                git \
+                rsync \
+                sudo \
+                python \
+                python-pytest \
+                python-yaml
+
+              modprobe loop 2>/dev/null || true
+
+              # Validate the Live installer privilege path before building.
+              test -f /workspace/archiso/airootfs/etc/sudoers.d/49-zinarix-calamares
+              install -m 0440 \
+                /workspace/archiso/airootfs/etc/sudoers.d/49-zinarix-calamares \
+                /tmp/49-zinarix-calamares
+              visudo -cf /tmp/49-zinarix-calamares
+              grep -qF "zinarix ALL=(root) NOPASSWD: /usr/bin/calamares" \
+                /workspace/archiso/airootfs/etc/sudoers.d/49-zinarix-calamares
+              grep -qF "com.github.calamares.calamares.pkexec.run" \
+                /workspace/archiso/airootfs/etc/polkit-1/rules.d/49-zinarix-calamares.rules
+              grep -qF "[\"/etc/sudoers.d/49-zinarix-calamares\"]=\"0:0:440\"" \
+                /workspace/archiso/profiledef.sh
+
+              # Validate Zinarix Platform before spending time compiling Calamares.
+              cd /workspace/zinarix-platform
+              export PYTHONPATH=/workspace/zinarix-platform
+
+              python -m compileall \
+                core \
+                daemon \
+                api \
+                cli \
+                gui \
+                modules \
+                tests
+
+              python -m pytest -q
+
+              cd /workspace
+
+              # build.sh requires a local Calamares repository. Build it on the
+              # GitHub runner so no local computer is needed.
+              useradd -m -s /bin/bash builder
+              printf "builder ALL=(ALL) NOPASSWD: ALL\n" > /etc/sudoers.d/zinarix-builder
+              chmod 0440 /etc/sudoers.d/zinarix-builder
+
+              rm -rf /tmp/calamares-aur
+              sudo -u builder git clone --depth=1 https://aur.archlinux.org/calamares.git /tmp/calamares-aur
+              sudo -u builder bash -lc "cd /tmp/calamares-aur && makepkg -s --noconfirm --needed"
+
+              rm -rf /workspace/.ci/zinarix-localrepo/*
+              cp /tmp/calamares-aur/calamares-[0-9]*.pkg.tar.zst /workspace/.ci/zinarix-localrepo/
+
+              cd /workspace/.ci/zinarix-localrepo
+              repo-add zinarix-local.db.tar.gz calamares-[0-9]*.pkg.tar.zst
+
+              test -e zinarix-local.db
+              ls -lh
+
+              cd /workspace
+              chmod +x build.sh scripts/brand-boot-menu.sh scripts/sync-live-assets.sh
+              ZINARIX_LOCAL_REPO=/workspace/.ci/zinarix-localrepo ./build.sh
+            '
+
+      - name: Verify generated ISO
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ISO="out/zinarix-by-abraham-tobal-1.0-x86_64.iso"
+          test -s "$ISO"
+          ls -lh "$ISO"
+          sha256sum "$ISO" | tee "$ISO.sha256"
+          file "$ISO"
+          df -h /
+
+      - name: Upload Zinarix ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: zinarix-by-abraham-tobal-${{ github.run_number }}
+          path: |
+            out/zinarix-by-abraham-tobal-1.0-x86_64.iso
+            out/zinarix-by-abraham-tobal-1.0-x86_64.iso.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
